@@ -38,64 +38,142 @@ what is contained in the report.}
 \href{https://gitlab.cas.mcmaster.ca/courses/capstone/-/blob/main/Lectures/L02b_POCAndDevPlan/POCAndDevPlan.pdf?ref_type=heads}
 {lecture slides}.}
 
-\section{Confidential Information?}
+\section{Confidential Information}
 
-\wss{State whether your project has confidential information from industry, or
-not.  If there is confidential information, point to the agreement you have in
-place.}
+There is no confidential information to protect.
 
-\wss{For most teams this section will just state that there is no confidential
-information to protect.}
 \section{IP to Protect}
 
-\wss{State whether there is IP to protect.  If there is, point to the agreement.
-All students who are working on a project that requires an IP agreement are also
-required to sign the ``Intellectual Property Guide Acknowledgement.''}
+There is no intellectual property information to protect.
 
 \section{Copyright License}
 
-\wss{What copyright license is your team adopting.  Point to the license in your
-repo.}
+Lake is licensed under the GNU General Public License Version 3.
+A copy of the GNU GPL license is available in the Lake repository
+\href{https://github.com/capstoneCEGJM/Lake/blob/main/LICENSE}
+{here}.
 
 \section{Team Meeting Plan}
 
-\wss{This section is for meetings between the team members, and meetings between 
-the team and their supervisor/advisor (as appropriate).}
+CinqGarçons will meet at minimum weekly every Friday at 2:40PM EST via Discord. Additional ad-hoc meetings
+will be scheduled as the need arises. Some ad-hoc meetings may be in-person, likely after/before
+lecture. There will be a minimum requirement of one in-person meeting per month. More than one
+meeting per month may be in-person, and it is up to the discretion of the team to decide when to
+convert a virtual meeting to an in-person meeting.
 
-\wss{How often will the team meet? where? when?}
+\vspace{5mm}
 
-\wss{If the meeting is a physical location (not virtual), out of an abundance of
-caution for safety reasons you shouldn't put the location online}
+Each week, team members will take turns being the chair and leading the meeting. The chair will be
+responsible for bringing a formal agenda to each meeting. The chair will also be responsible for
+introducing the agenda to the team, and ensuring the agenda points are addressed during the meeting.
+Ad-hoc meetings may only have an informal unwritten agenda due to their potentially last-minute nature.
 
-\wss{To help schedule meetings, you can use the lecture/tutorial time when we do 
-not have anything else scheduled.}
+\vspace{5mm}
 
-\wss{How often will you meet with your supervisor/advisor?  when?  where?}
-
-\wss{Will meetings be virtual?  At least some meetings should likely be
-in-person.}
-
-\wss{How will the meetings be structured?  There should be a chair for all meetings.  
-There should be an agenda for all meetings.}
+The order in which members will fill the role of meeting chair are as follows:
+\begin{itemize}
+	\item Colin Chambachan
+	\item Jinwoo Hong
+	\item Matthew Nesbitt
+	\item Gary Qin
+	\item Ethan Walsh
+\end{itemize}
 
 \section{Team Communication Plan}
 
-\wss{Issues on GitHub should be part of your communication plan.}
+Formal text-based team communications will be facilitated through a Discord server, with additional
+communication happening verbally during meetings.
+
+\vspace{5mm}
+
+Project design and repository related communications may also occur on a pull request during the
+review phase, or in the comments of a related GitHub issue. All formal action items shall have an
+associated GitHub issue to track the item's progress. Pull requests should be associated with an
+issue, and may resolve said Issue. Issues will be the primary method of work assignment and work
+splitting within the team, as each issue shall have one or more assigned members. Issues may also be
+created as a discussion thread for particular design decisions that require deliberation.
 
 \section{Team Member Roles}
 
-\wss{You should identify the types of roles you anticipate, like notetaker,
-leader, meeting chair, reviewer.  Assigning specific people to those roles is
-not necessary at this stage.  In a student team the role of the individuals will
-likely change throughout the year.}
+Team members may fill roles dynamically throughout the year as best fits the situation. Some roles,
+however, are assigned permanent members. Members may fill more than one role, and roles may be
+filled by more than one member. Identified member roles are as follows:
+\begin{itemize}
+	\item Liason: Ethan Walsh
+	\item Meeting Chair: Dynamic
+	\item Repo/Org Administrator: Matthew Nesbitt
+	\item Technical Lead (Architecture): TBD
+	\item Technical Lead (IPC): TBD
+	\item Technical Lead (UI/UX): TBD
+	\item Technical Lead (ML): TBD
+	\item Technical Lead (Performance): TBD
+\end{itemize}
 
 \section{Workflow Plan}
 
+All contributions to production are required to go through a pull request, and aquire approval from
+at minimum two reviewers. When working on a contribution, using either the branching workflow or
+forking workflow is acceptable, and it is up to the individual contributor to decide which workflow
+to use.
+
+\subsection{Contribution Flow}
+\begin{enumerate}
+	\item For branching workflow:
+		\begin{enumerate}
+			\item Create a new working branch in the main repository. The branch name should be
+				descriptive, and should ahere to the
+				\href{https://conventionalbranch.org/}{conventionalbranch} standard.
+			\item Commit desired changes to the working branch. Commit names should be descriptive
+				but turse, and should adhere to the
+				\href{https://www.conventionalcommits.org/en/v1.0.0/}{conventionalcommits}
+				standard.
+		\end{enumerate}
+	\item For forking workflow:
+		\begin{enumerate}
+			\item Create a fork of the main repository. Only one fork per contributor is required.
+			\item Create a new working branch in this fork. There are no restrictions on branch
+				names made in forks.
+			\item Commit desired changes to the working branch. Commit names should be descriptive
+				but turse, and should adhere to the
+				\href{https://www.conventionalcommits.org/en/v1.0.0/}{conventionalcommits}
+				standard.
+		\end{enumerate}
+	\item Open a pull request from the working branch to the \verb|main| branch in the main repository.
+	\item Address any changes requested during review.
+	\item After the pull request has recieved two approvals and passes CI, it can be merged.
+	\item For branching workflow:
+		\begin{enumerate}
+			\item After a PR has been merged, the associated work branch should be deleted. This can
+				be done directly from the PR page.
+		\end{enumerate}
+\end{enumerate}
+
+\subsection{Issues}
+
+Issues will be used to track action items, and occasionally for design decisions that require
+deliberation. When creating an issue, a description should be included providing all the information
+required to address the issue. In addition, the issue may be labeled with one or more relevant
+tag(s) if applicable. The available tags are as follows: \verb|bug|, \verb|feature|, \verb|decision|,
+\verb|improvement|, \verb|priority: high|, \verb|priority: low|. Pull requests should be associated
+with an issue, and may close said issue by including a close tag.
+
+\vspace{5mm}
+
+Issues will also be created (in separate projects) for each lecture, as well as each TA meeting.
+Issue templates will be created for both lecture and TA meeting issues to make the creation
+of these issues easier and faster.
+
+\subsection{CI/CD}
+
+CI/CD will utilize GitHub Actions, will be required to pass for a PR to be merged, and will
+consist of the following stages:
 \begin{itemize}
-	\item How will you be using git, including branches, pull request, etc.?
-	\item How will you be managing issues, including template issues, issue
-	classification, etc.?
-  \item Use of CI/CD
+	\item PDF building and publishing
+	\item Code linting
+	\item Unit testing
+	\item Integration testing
+	\item System testing
+	\item Performance testing
 \end{itemize}
 
 \section{Project Decomposition and Scheduling}
