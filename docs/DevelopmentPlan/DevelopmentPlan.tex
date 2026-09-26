@@ -2,6 +2,7 @@
 
 \usepackage{booktabs}
 \usepackage{tabularx}
+\usepackage{hyperref}
 
 \title{Development Plan\\\progname}
 
@@ -151,14 +152,26 @@ Topics to discuss include the following:
 
 \section{Use of AI and LLMs}
 
-\wss{This section is a continuation of the previous section.  The role of LLMs
-in your project as important enough to warrant their own section.  
-How will your team be using LLMs for code and documentation development?  
-What tools will you be using?  How will you verify the output of your LLMs?}
+\subsection{AI Usage}
+The team will mainly be using LLMs throughout the project's development for menial
+coding tasks such as boilerplate code, unit tests, and in-line comments. LLMs will also
+be consulted as a second opinion for verifying \& considering alternatives to
+architectural design decisions.
+
+\subsection{AI Tools}
+The team will be using commercially-available Anthropic and OpenAI models (eg. Claude
+Opus/Sonnet, ChatGPT).
+
+\subsection{AI Verification}
+The team will verify the output of LLMs by ensuring all code is read \& reviewed by the
+LLM user \& at least 2 other members in a pull request. Additionally, unit tests will be
+used to verify all code correctness, and code linters will be used to verify all code
+styling and syntax.
 
 \section{Coding Standard}
 
-\wss{What coding standard will you adopt?}
+The team will adopt industry-standard language-specific coding standards \& styles guides.
+For Python code, the \href{https://peps.python.org/pep-0008/}{PEP 8} style guide will be used.
 
 \newpage{}
 
