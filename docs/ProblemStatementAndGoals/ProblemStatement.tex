@@ -105,13 +105,13 @@ This is a key shortcoming of existing local distributed inference providers that
 The system can operate via both wired and wireless connection (v0: wired, v1+: wireless). The network latency and variability imposed by a wireless connection may make the distributed system throughput too low for practical use.
 
 \subsection{Extended Cross-Platform Support for Smartphones}
-IOS and Android inference is commonly supported by inference engines, but practical feasibility of distributing inference to smartphones remains unknown, due to the limitations of smartphone hardware.
+iOS and Android inference is commonly supported by inference engines, but practical feasibility of distributing inference to smartphones remains unknown, due to the limitations of smartphone hardware.
 
 \subsection{Concurrent Inference}
-The distributed system can serve inference to at least two concurrent users at the same time, rather than completeing singular requests sequentially. Each request must keep its own state so user outputs do not interfere with one another. This would improve aggregate throughput and observered latency when multiple users are using the model.
+The distributed system can serve inference to at least two concurrent users at the same time, rather than completing singular requests sequentially. Each request must keep its own state so user outputs do not interfere with one another. This would improve aggregate throughput and observed latency when multiple users are using the model.
 
 \subsection{Privacy and Security}
-Communication between devices are encrypted, protecting requests and intermediate data from other devices that may be observing the network. Devices can also authenticate before joining the network cluster, protecting data in transit and ensure only trusted devices are utilized.
+Communication between devices is encrypted, protecting requests and intermediate data from other devices that may be observing the network. Devices can also authenticate before joining the network cluster, protecting data in transit and ensuring only trusted devices are utilized.
 
 \section{Custom Documents (CDs)}
 
