@@ -170,13 +170,13 @@ ChatGPT Web and Claude Web were used in conjunction with team member discussions
 
 \subsection{How and Where Used}
 
-Claude Web was used while researching and brainstorming technical details for the Proof of Concept Demonstration and Expected Technology sections. Research included how to split up the layers of an LLM accross devices, how \verb|llamma.cpp| and \verb|ggml| for inference, communication between devices, and testing the split model.
+Claude Web was used while researching and brainstorming technical details for the Proof of Concept Demonstration and Expected Technology sections. Research included how to split up the layers of an LLM accross devices, how \verb|llamma.cpp| and \verb|ggml| compares to \verb|ONNX| for inference, whether to use Rust vs C++ for the device engine, how communication between devices would function, and how to test the split model.
 
 ChatGPT Web and Claude Web were also used to provide a general pass throughout the document for any spelling or grammar issues.
 
 \subsection{Verification of AI-Generated Content}
 
-Proposed changes in the document are reviewed through pull requests, and the branch rules require at least two approvals from team members before merging. High level technical details were verified against the \verb|ggml|, \verb|llama.cpp|, \verb|Tonic| documentation. However, claims about the feasibility of layer splitting, cross-device compatibility, and performance remain hypotheses until a proof of concept implementation can be used to verify them.
+Proposed changes in the document are reviewed through pull requests, and the branch rules require at least two approvals from team members before merging. High level technical details were verified against \verb|ggml|, \verb|llama.cpp|, and \verb|Tonic| documentation. However, claims about the feasibility of layer splitting, cross-device compatibility, and performance remain hypotheses until a proof of concept implementation can be used to verify them.
 
 \newpage{}
 
@@ -201,12 +201,12 @@ Proposed changes in the document are reviewed through pull requests, and the bra
 
     Disadvantages include maintenance overhead of tests and CI, including flaky tests or long running tasks, which may block valid changes or unnecssarily reduce team velocity. Standard CI runners may also lack the hardware capabilities to run certain jobs, and suitable runners may incur costs.
 
-    Many of these disadvantages can be circumbented with good CI/CD design and team-coordination; ensuring tasks relevant to the diff are ran in the CI, and balancing the frequency of longer running tasks.
+    Many of these disadvantages can be circumvented with good CI/CD design and team-coordination; ensuring tasks relevant to the diff are ran in the CI, and balancing the frequency of longer running tasks.
 
     \item What disagreements did your group have in this deliverable, if any,
     and how did you resolve them?
 
-    Disagreements in what underlying technologies and frameworks to utilize for the proof of concept were made, such as whether to use C++ or Rust for the inference engine. C++ was the initial choice due to being the language used in \verb|llamma.cpp|, but Rust was suggested after it was determined that it can call \verb|ggml|'s C interface, as well as provide other benefits, such as stronger memory checks, and better team familiarity. It was agreed to revise the plan to use Rust as the initial choice, while leaving final decisions open to change during implementation of the proof of concept.
+    Disagreements occurred in the underlying technologies and frameworks to utilize for the proof of concept, such as whether to use C++ or Rust for the inference engine. C++ was the initial choice due to being the language used in \verb|llamma.cpp|, but Rust was suggested after it was determined that it can call \verb|ggml|'s C interface, as well as provide other benefits, such as stronger memory checks, and better team familiarity. It was agreed to revise the plan to use Rust as the initial choice, while leaving final decisions open to change during implementation of the proof of concept.
 
 \end{enumerate}
 
