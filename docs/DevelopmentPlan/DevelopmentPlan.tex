@@ -2,6 +2,7 @@
 
 \usepackage{booktabs}
 \usepackage{tabularx}
+\usepackage{placeins}
 
 \title{Development Plan\\\progname}
 
@@ -31,8 +32,16 @@ Date2 & Name(s) & Description of changes\\
 
 \newpage{}
 
-\wss{Put your introductory blurb here.  Often the blurb is a brief roadmap of
-what is contained in the report.}
+This document serves as the development plan for \progname{} by CinqGarçons.
+Lake splits a large language model (LLM) across multiple devices so that they
+can run the model together. The plan covers how the project will be conducted.
+The first sections deal with confidentiality, intellectual property and
+licensing, followed by how the team is going to be organized for the duration
+of the project. Section~\ref{SecDecomp} breaks down
+the work and lays out the schedule, Section~\ref{SecPoC} describes the proof of
+concept, and Section~\ref{SecTech} lists the expected technology. The plan
+finishes with the use of AI tools and coding standards, while the team
+charter and reflections are in the appendices. 
 
 \wss{Additional information on the development plan can be found in the
 \href{https://gitlab.cas.mcmaster.ca/courses/capstone/-/blob/main/Lectures/L02b_POCAndDevPlan/POCAndDevPlan.pdf?ref_type=heads}
@@ -99,55 +108,340 @@ likely change throughout the year.}
 \end{itemize}
 
 \section{Project Decomposition and Scheduling}
+\label{SecDecomp}
 
-\begin{itemize}
-  \item How will you be using GitHub projects?
-  \item Include a link to your GitHub project
-\end{itemize}
+All planning runs through GitHub, and the schedule follows the course
+deadlines, each with an internal deadline two days earlier.
 
-\wss{How will the project be scheduled?  This is the big picture schedule, not
-details. You will need to reproduce information that is in the course outline
-for deadlines.}
+\subsection{GitHub Projects}
+
+All project work is tracked on the
+\href{https://github.com/orgs/capstoneCEGJM/projects/1}{Lake GitHub Project}.
+Every issue from the Workflow Plan gets a card on the board, and cards move
+through Backlog, Ready, In Progress, In Review and Done columns. An issue only
+moves to Ready once it has a description, a work estimate and at least
+one assignee. Cards are also tagged with the part of the system they touch,
+such as the coordinator, a node agent, networking, the dashboard or
+documentation.
+
+Each deliverable in Table~\ref{TblSchedule} gets its own GitHub milestone,
+with the due date set to the internal deadline rather than the course
+deadline. That way the board always reflects the date being worked
+toward. Lecture and TA meeting issues are kept in separate projects, as noted
+in the Workflow Plan, so this board only holds project work.
+
+\subsection{Breaking Down Work}
+
+Work is split by feature instead of by document. On the code side, issues map
+to parts of the system. On the documentation side, an issue is typically a
+section or one piece of analysis. Anything that looks like more than about
+eight hours of work gets split before anyone starts on it. 
+
+Every issue should say what done looks like. For code, that is usually a test
+that passes or a measurement that gets recorded. For a document section, done
+means the section meets the level~4 rubric criteria and has been checked
+against the deliverable's checklist.
+
+The course assumes about ten hours per person per week, including class time,
+which gives roughly 50 hours of team time a week to plan around. At the Friday
+meeting, the chair goes through the board with the next internal deadline in
+mind. Members pick up Ready issues, and the chair makes sure nobody is
+overloaded while someone else has nothing to do. Members shall also take
+issues outside their own technical lead area now and then, so that more than
+one person understands each component.
+
+\subsection{Schedule}
+
+The team's schedule is built around the given course deadlines while allocating an internal deadline two days before each public facing one. Reserving the last two days allows for double-checking deliverables and catching issues that slip through. For
+demonstrations such as the proof of concept (PoC), the internal deadline is
+two days before the assigned slot, and after that point only bug fixes are
+merged. Table~\ref{TblSchedule} lists every graded deliverable, with dates
+taken from the course calendar. Smaller items like the contribution surveys,
+the productivity reports and the module implementation exercise go
+on the board with the same two-day buffer.
+
+\begin{table}[!htbp]
+\centering
+\caption{Course deliverables with official and internal deadlines}
+\label{TblSchedule}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}Xrll}
+\toprule
+\textbf{Deliverable} & \textbf{Weight} & \textbf{Official} & \textbf{Internal}\\
+\midrule
+\multicolumn{4}{l}{\textit{Fall term, 2026}}\\
+Problem Statement, PoC Plan, Development Plan and Team Charter & 2\% &
+  Sept 28 & --$^{*}$\\
+Peer review of another team's Problem Statement and Development Plan & -- &
+  Oct 1 & Sept 29\\
+SRS and Hazard Analysis (Rev~0) & 7\% & Oct 19 & Oct 17\\
+Peer review of SRS and Hazard Analysis & -- & Oct 22 & Oct 20\\
+V\&V Plan (Rev~0) & 5\% & Nov 2 & Oct 31\\
+Peer review of V\&V Plan & -- & Nov 5 & Nov 3\\
+Design Document (Rev~$-1$) and Design Thinking Report (CD-Fall) & 3\% &
+  Nov 16 & Nov 14\\
+Peer review of Design Document (Rev~$-1$) & -- & Nov 19 & Nov 17\\
+PoC Demonstration and interviews & 5\% & Nov 23 to Dec 3 & $^{\dagger}$\\
+\midrule
+\multicolumn{4}{l}{\textit{Winter term, 2027}}\\
+Design Document (Rev~0) & 4\% & Jan 18 & Jan 16\\
+Revision 0 Demonstration and interviews & 10\% & Feb 1 to 11 &
+  $^{\dagger}$\\
+V\&V Report (Rev~0) and Performance Report (CD-Winter) & 4\% & Mar 8 &
+  Mar 6\\
+Peer review of V\&V Report and CD-Winter & -- & Mar 11 & Mar 9\\
+Final Demonstration (Rev~1) & 20\% & Mar 15 to 21 & $^{\dagger}$\\
+Final Documentation (Rev~1), EXPO poster and video & 30\% & Mar 31 &
+  Mar 29\\
+Capstone EXPO & 10\% & Apr 6 (TBC) & Apr 4\\
+\bottomrule
+\end{tabularx}
+
+\vspace{2pt}
+\raggedright
+{\footnotesize $^{*}$The internal deadline policy was adopted while this
+deliverable was already in progress.\\
+$^{\dagger}$Two days before the team's assigned slot.}
+\end{table}
+
+Implementation runs alongside the documents in the phases shown in
+Table~\ref{TblPhases}. 
+
+\begin{table}[!htbp]
+\centering
+\caption{Implementation phases}
+\label{TblPhases}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.6cm}%
+>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Phase} & \textbf{Dates} & \textbf{Main work}\\
+\midrule
+Setup & Sept 28 to Oct 16 & Get ggml and llama.cpp building on every team
+  member's machine and record single-device baselines\\
+Proof of concept & Oct 19 to the PoC slot & The two-device split described in
+  Section~\ref{SecPoC}\\
+Core system & December to the Rev~0 slot & Any number of devices, profiling,
+  the partitioner, node agents joining and leaving, the dashboard, and
+  re-splitting the model between requests\\
+Dynamic allocation & Feb 12 to Mar 5 & Re-splitting during a session,
+  benchmarks for the Performance Report, and the wireless stretch goal\\
+Refinement & Mar 8 to Apr 6 & Feedback from Rev~0, final documentation and
+  EXPO preparation\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\FloatBarrier
 
 \section{Proof of Concept Demonstration Plan}
+\label{SecPoC}
 
-What is the main risk, or risks, for the success of your project?  What will you
-demonstrate during your proof of concept demonstration to convince yourself that
-you will be able to overcome this risk?
+The PoC is meant to show early on that the project is feasible and to establish the scope of what shall be delivered by the end of the project.
 
-\section{Expected Technology}
+\subsection{Risks}
 
-\wss{What programming language or languages do you expect to use?  What external
-libraries?  What frameworks?  What technologies.  Are there major components of
-the implementation that you expect you will implement, despite the existence of
-libraries that provide the required functionality.  For projects with machine
-learning, will you use pre-trained models, or be training your own model?  }
+The biggest risk is not being able to split a model across devices at all.
+Tools like llama.cpp run the whole model in one process, so splitting it means
+working directly with ggml, the tensor library underneath. Each device has to
+load only its own range of layers from the model file, run them, keep its own
+key-value (KV) cache, and pass the hidden state on to the next device intact.
+Every other part of Lake depends on this working.
 
-\wss{The implementation decisions can, and likely will, change over the course
-of the project.  The initial documentation should be written in an abstract way;
-it should be agnostic of the implementation choices, unless the implementation
-choices are project constraints.  However, recording our initial thoughts on
-implementation helps understand the challenge level and feasibility of a
-project.  It may also help with early identification of areas where project
-members will need to augment their training.}
+Two smaller risks come along with it. The first is network overhead. Text is
+generated one token at a time, and each token has to cross every device connection.
+One transfer is small, but its latency is added to every token. On a slow link, a split
+model could end up noticeably slower than running it on one machine. 
 
-Topics to discuss include the following:
+The second risk is mixing platforms. Kernels differ across device types, so
+their floating-point results are not bit-identical. Devices on different
+platforms have to agree on the hidden state format, and the output has to stay
+coherent despite the small numerical differences.
+
+Dynamic re-allocation is what sets Lake apart from existing tools, but it is
+left out of the PoC. Re-allocation cannot work until the basic split does, and
+trying to do both by November would turn the PoC into a prototype.
+
+The PoC is also not expected to be faster than a single device. With a
+pipeline split, each token still goes through every layer in order, so
+splitting a model that already fits on one machine does not speed up a single
+request. Splitting pays off when a model is too big for any one device, or
+when several requests run at once. For the PoC, the goal is to measure how
+much overhead the split adds.
+
+\subsection{Demonstration}
+
+The demonstration uses a model (which is to be determined) to be split by hand down the middle. Initially, a model will be split up and run on two separate processes on one system to prove feasibility, and it will be further iterated on if feasible. A bare-bones
+command-line coordinator hands out the layer ranges. The partitioner, profiler
+and dashboard are not part of the PoC.
+
+The demonstration builds up in three steps, with each step adding one more
+thing that can go wrong:
+
+\begin{enumerate}
+  \item Two processes on the same laptop, talking over localhost. This tests
+    the split by itself, without a real network or different platforms.
+  \item Two laptops of the same type connected by wired Ethernet, which adds
+    real network latency.
+  \item Two laptops with different operating systems and processor
+    architectures, for example an Apple Silicon MacBook and an x86 Windows or
+    Linux machine.
+\end{enumerate}
+
+Each step runs a prompt from the command line and compares the streamed output
+with the same prompt run through plain llama.cpp on one machine. Each device's
+memory use is also shown, to confirm that it loaded only its own layers, along
+with a per-token breakdown of compute time on each device against time spent
+on transfers.
+
+The PoC counts as a success if the split model produces a sensible response
+to a prompt, with the hidden state passed between the two halves without
+errors. Reaching this in step one is enough. Steps two and three are attempted
+if time allows, and any progress on them is shown as extra evidence. The output
+does not need to match a single device exactly, and there is no speed target.
+Transfer times are recorded to guide later work, but they do not decide
+whether the PoC passes.
+
+\subsection{Fallback Options}
+
+If the PoC shows that one of these risks is worse than expected, the scope
+will be discussed with the TA afterward. The current fallback ideas are:
 
 \begin{itemize}
-\item Specific programming language
-\item Specific libraries
-\item Pre-trained models
-\item Specific linter tool (if appropriate)
-\item Specific unit testing framework
-\item Investigation of code coverage measuring tools
-\item Specific plans for Continuous Integration (CI), or an explanation that CI
-  is not being done
-\item Specific performance measuring tools (like Valgrind), if
-  appropriate
-\item Tools you will likely be using?
+  \item If a custom split on top of ggml cannot be made to work, build Lake's
+    coordination and allocation on llama.cpp's remote procedure call (RPC)
+    backend instead.
+  \item If network overhead is too high, move the performance goal toward
+    models that do not fit on one device and toward several requests at once,
+    since splitting still helps there.
+  \item If splits across platforms produce bad output, limit Rev~0 to the
+    platform combinations that work and make the rest a stretch goal.
 \end{itemize}
 
-\wss{git, GitHub and GitHub projects should be part of your technology.}
+\section{Expected Technology}
+\label{SecTech}
+
+These are the current technology choices, which are subject to change once
+building starts. The SRS and design documents will not depend on them.
+Alongside the tools below, git and GitHub are used for version control,
+issues, pull requests, the project board and document publishing, and Discord
+for day-to-day communication.
+
+\subsection{Languages and Frameworks}
+
+The coordinator will be written in Python. Its job is handing out layer
+assignments and collecting measurements, so it is not on the per-token path
+and Python's speed is not a concern there. Go and Rust were discussed, but the
+extra speed would not help in that part of the system, and the whole team is
+already comfortable with Python. The client-facing application programming
+interface (API) will use FastAPI, and the dashboard will be built with React
+and TypeScript.
+
+The inference engine on each device is expected to be written in Rust. The
+ggml library is written in C, and splitting the model means building ggml's
+compute graph directly. Rust matches C++ in speed and calls C functions
+directly, so there is no extra layer on every token. Rust also enforces memory
+safety and resource cleanup at compile time, where C++ leaves both to the
+programmer, which makes it easier to learn for a team that has mostly not
+worked in C++. The calls into ggml still need unsafe Rust, so that code is kept
+in one small module. C++ was the other option considered, since llama.cpp is
+written in it. If Android support happens, the node agent there would be
+written in Kotlin and call the same Rust code through the Java Native
+Interface (JNI).
+
+Devices talk to each other and to the coordinator using gRPC with Protocol
+Buffers. From one message definition, matching Python and Rust code is
+generated, using the Tonic library on the Rust side, and gRPC's streaming calls
+fit the token-by-token handoff. The downside is
+some framing overhead compared with raw sockets, which the PoC will measure.
+If the overhead turns out to matter, the alternatives to evaluate are raw TCP
+with FlatBuffers, ZeroMQ and QUIC, and QUIC would also help on unreliable
+Wi-Fi.
+
+\subsection{Inference and Models}
+
+The model math itself will run on ggml, the tensor library underneath
+llama.cpp. The library already has fast quantized kernels for both x86 and
+ARM, plus GPU backends such as Metal and CUDA, which covers every target
+platform. Lake's own code handles the splitting, networking and profiling
+around it. The catch is that ggml's API is low-level and changes often, so
+ggml will be pinned to a specific version.
+
+Another option considered was ONNX with ONNX Runtime. ONNX models are
+portable, and standard tools can cut an ONNX graph into subgraphs, which would
+suit layer splitting. The deciding factor for ggml was that quantized versions of popular open
+models are much more widely available as GGUF files. ONNX Runtime stays
+as the backup if ggml's API proves too hard to work with.
+
+Lake is meant to be model agnostic. Any pre-trained transformer LLM that ggml
+supports should work, rather than one specific model, and no model will be
+trained or fine-tuned. Small models are used during development because they
+load quickly, and larger ones are used later to test running a model that does
+not fit on one device. Weights are stored as 4-bit quantized GGUF files, which
+are roughly a third of the size of 16-bit weights. Each device memory-maps the
+file and reads only its own layers. Weights are downloaded under each model's
+own license and are not committed to the repository.
+
+\subsection{Components Built for Lake}
+
+Existing projects such as exo, prima.cpp and llama.cpp's RPC backend can
+already split models across machines, and they will serve as references. Lake
+still needs its own coordinator, partitioner and transport between devices. In
+exo, layers are assigned once at the start of a session, and llama.cpp's RPC
+backend fixes the split when the model loads. Changing the split during a
+session, which is Lake's dynamic allocation goal, needs control over layer
+assignment and the KV cache that these tools do not offer.
+
+The partitioner will profile each device's per-layer speed, free memory and
+network latency, then pick the split points that give the lowest time per
+token. A simple greedy approach comes first, with dynamic programming
+replacing it once that works.
+
+\subsection{Testing and Continuous Integration}
+
+Table~\ref{TblTools} shows the linters and unit testing frameworks for each
+language. Code coverage on the Python side will use pytest-cov. On the Rust
+side, cargo-llvm-cov and tarpaulin both still need to be tried with the build before
+picking one. A coverage target will be set during the PoC phase, once there is
+enough code to measure.
+
+\begin{table}[!htbp]
+\centering
+\caption{Linters and unit testing frameworks by language}
+\label{TblTools}
+\small
+\begin{tabularx}{\textwidth}{l*{3}{>{\raggedright\arraybackslash}X}}
+\toprule
+\textbf{Purpose} & \textbf{Python} & \textbf{Rust} & \textbf{TypeScript}\\
+\midrule
+Linting and formatting & Ruff & Clippy, rustfmt & ESLint, Prettier\\
+Unit testing & pytest & cargo test & Vitest\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+GitHub Actions already builds and publishes the \LaTeX{} documents, and a
+second workflow for code will run the stages listed in the Workflow Plan on
+every pull request. The Rust build and tests will run on Linux, macOS and
+Windows runners, so anything platform-specific breaks right away rather than
+at a demo. For integration tests, continuous integration (CI) will split a
+tiny test model across two local processes and compare the
+result with an unsplit run, since a real model would take too long on every
+pull request. CI runners are shared virtual machines with noisy timing, so the
+performance stage there is only a smoke test for large regressions. Real
+performance numbers and system tests will come from team members' own
+machines before each demo.
+
+\subsection{Performance Measurement}
+
+Most performance data will come from Lake's own per-token profiler, which
+records compute time on each device and transfer time between devices. The
+same data feeds the partitioner and the dashboard. For comparison,
+llama-bench and llama-perplexity from llama.cpp give single-device numbers for
+speed and output quality. The unsafe code that calls into ggml will also be tested under
+AddressSanitizer in CI to catch memory bugs early.
 
 \section{Use of AI and LLMs}
 
