@@ -99,16 +99,19 @@ The system is able to operate across different operating systems and platforms (
 In the case goal 2.2 can be achieved (model parallelization), the system can dynamically allocate the parallelized model across the pool of available devices.
 This is a key shortcoming of existing local distributed inference providers that only do one allocation pass at the start of the session. By achieving this goal, the system would be more efficient and resilient since it can continue to operate as devices drop or are added to the network.
 
-\end{itemize}
-
 \section{Stretch Goals}
 
-\begin{itemize}
-    \item The system can operate via both wired and wireless connection (v0: wired, v1+: wireless)
-\end{itemize}
+\subsection{Wired and Wireless Connections}
+The system can operate via both wired and wireless connection (v0: wired, v1+: wireless). The network latency and variability imposed by a wireless connection may make the distributed system throughput too low for practical use.
 
-\wss{Goals you hope to get to, but not necessary.  They are also helpful if the
-scope of the original project needs to be expanded.}
+\subsection{Extended Cross-Platform Support for Smartphones}
+IOS and Android inference is commonly supported by inference engines, but practical feasibility of distributing inference to smartphones remains unknown, due to the limitations of smartphone hardware.
+
+\subsection{Concurrent Inference}
+The distributed system can serve inference to at least two concurrent users at the same time, rather than completeing singular requests sequentially. Each request must keep its own state so user outputs do not interfere with one another. This would improve aggregate throughput and observered latency when multiple users are using the model.
+
+\subsection{Privacy and Security}
+Communication between devices are encrypted, protecting requests and intermediate data from other devices that may be observing the network. Devices can also authenticate before joining the network cluster, protecting data in transit and ensure only trusted devices are utilized.
 
 \section{Custom Documents (CDs)}
 
