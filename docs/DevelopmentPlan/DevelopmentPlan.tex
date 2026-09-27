@@ -40,7 +40,7 @@ licensing, followed by how the team is going to be organized for the duration
 of the project. Section~\ref{SecDecomp} breaks down
 the work and lays out the schedule, Section~\ref{SecPoC} describes the proof of
 concept, and Section~\ref{SecTech} lists the expected technology. The plan
-finishes with the use of AI tools and the coding standard, and the team
+finishes with the use of AI tools and coding standards, while the team
 charter and reflections are in the appendices. 
 
 \wss{Additional information on the development plan can be found in the
@@ -152,12 +152,12 @@ one person understands each component.
 
 \subsection{Schedule}
 
-The team's schedule is built around the given course deadlines while allocating an internal deadline two days before each public facing one. Reserving the last two days allows for double-checking deliverables and finding catches that slip through. For
+The team's schedule is built around the given course deadlines while allocating an internal deadline two days before each public facing one. Reserving the last two days allows for double-checking deliverables and catching issues that slip through. For
 demonstrations such as the proof of concept (PoC), the internal deadline is
 two days before the assigned slot, and after that point only bug fixes are
 merged. Table~\ref{TblSchedule} lists every graded deliverable, with dates
-taken from the course calendar. Smaller items, like the contribution surveys,
-the productivity reports and the module implementation exercise in January, go
+taken from the course calendar. Smaller items like the contribution surveys,
+the productivity reports and the module implementation exercise go
 on the board with the same two-day buffer.
 
 \begin{table}[!htbp]
@@ -339,15 +339,22 @@ already comfortable with Python. The client-facing application programming
 interface (API) will use FastAPI, and the dashboard will be built with React
 and TypeScript.
 
-The inference engine on each device is expected to be C++. The ggml library is
-written in C, and splitting the model means building ggml's compute graph
-directly, so C++ avoids a call from Python into C on every token. If Android
-support happens, the node agent there would be written in Kotlin and call the
-same C++ code through the Java Native Interface (JNI).
+The inference engine on each device is expected to be written in Rust. The
+ggml library is written in C, and splitting the model means building ggml's
+compute graph directly. Rust matches C++ in speed and calls C functions
+directly, so there is no extra layer on every token. Rust also enforces memory
+safety and resource cleanup at compile time, where C++ leaves both to the
+programmer, which makes it easier to learn for a team that has mostly not
+worked in C++. The calls into ggml still need unsafe Rust, so that code is kept
+in one small module. C++ was the other option considered, since llama.cpp is
+written in it. If Android support happens, the node agent there would be
+written in Kotlin and call the same Rust code through the Java Native
+Interface (JNI).
 
 Devices talk to each other and to the coordinator using gRPC with Protocol
-Buffers. From one message definition, gRPC generates both the Python and C++
-code, and its streaming calls fit the token-by-token handoff. The downside is
+Buffers. From one message definition, matching Python and Rust code is
+generated, using the Tonic library on the Rust side, and gRPC's streaming calls
+fit the token-by-token handoff. The downside is
 some framing overhead compared with raw sockets, which the PoC will measure.
 If the overhead turns out to matter, the alternatives to evaluate are raw TCP
 with FlatBuffers, ZeroMQ and QUIC, and QUIC would also help on unreliable
@@ -395,8 +402,8 @@ replacing it once that works.
 \subsection{Testing and Continuous Integration}
 
 Table~\ref{TblTools} shows the linters and unit testing frameworks for each
-language. Code coverage on the Python side will use pytest-cov. On the C++
-side, gcov and llvm-cov both still need to be tried with the build before
+language. Code coverage on the Python side will use pytest-cov. On the Rust
+side, cargo-llvm-cov and tarpaulin both still need to be tried with the build before
 picking one. A coverage target will be set during the PoC phase, once there is
 enough code to measure.
 
@@ -407,17 +414,17 @@ enough code to measure.
 \small
 \begin{tabularx}{\textwidth}{l*{3}{>{\raggedright\arraybackslash}X}}
 \toprule
-\textbf{Purpose} & \textbf{Python} & \textbf{C++} & \textbf{TypeScript}\\
+\textbf{Purpose} & \textbf{Python} & \textbf{Rust} & \textbf{TypeScript}\\
 \midrule
-Linting and formatting & Ruff & clang-format, clang-tidy & ESLint, Prettier\\
-Unit testing & pytest & GoogleTest & Vitest\\
+Linting and formatting & Ruff & Clippy, rustfmt & ESLint, Prettier\\
+Unit testing & pytest & cargo test & Vitest\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 GitHub Actions already builds and publishes the \LaTeX{} documents, and a
 second workflow for code will run the stages listed in the Workflow Plan on
-every pull request. The C++ build and tests will run on Linux, macOS and
+every pull request. The Rust build and tests will run on Linux, macOS and
 Windows runners, so anything platform-specific breaks right away rather than
 at a demo. For integration tests, continuous integration (CI) will split a
 tiny test model across two local processes and compare the
@@ -433,8 +440,8 @@ Most performance data will come from Lake's own per-token profiler, which
 records compute time on each device and transfer time between devices. The
 same data feeds the partitioner and the dashboard. For comparison,
 llama-bench and llama-perplexity from llama.cpp give single-device numbers for
-speed and output quality. The C++ engine will also run under AddressSanitizer
-in CI to catch memory bugs early.
+speed and output quality. The unsafe code that calls into ggml will also be tested under
+AddressSanitizer in CI to catch memory bugs early.
 
 \section{Use of AI and LLMs}
 
