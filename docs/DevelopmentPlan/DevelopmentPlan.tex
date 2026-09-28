@@ -525,10 +525,10 @@ AddressSanitizer in CI to catch memory bugs early.
 \section{Use of AI and LLMs}
 
 \subsection{AI Usage}
-The team will mainly be using LLMs throughout the project's development for menial
-coding tasks such as boilerplate code, unit tests, and in-line comments. LLMs will also
-be consulted as a second opinion for code reviews and verifying \& considering alternatives
-to architectural design decisions.
+The team will use LLMs to write the majority of the code for the project.
+Coding tasks that LLMs will primarily be used for include boilerplate code, unit tests, \& in-line comments.
+LLMs will also be consulted as a second opinion for code reviews and verifying \& considering alternatives to
+architectural design decisions \& critical sections of the code.
 
 \subsection{AI Tools}
 The team will be using commercially-available Anthropic and OpenAI models (eg. Claude
@@ -536,9 +536,10 @@ Opus/Sonnet, ChatGPT).
 
 \subsection{AI Verification}
 The team will verify the output of LLMs by ensuring all code is read \& reviewed by the
-LLM user \& at least 2 other members in a pull request. Additionally, unit tests will be
-used to verify all code correctness, and code linters will be used to verify all code
-styling and syntax.
+LLM user \& at least 2 other members in a pull request. Due to the heavy usage of LLMs, Git commits
+will be atomic \& pull requests will not exceed 400 lines of changes to ensure every PR can be reasonably
+reviewed carefully. Additionally, unit tests will be used to verify all code correctness, and code linters 
+will be used to verify all code styling and syntax.
 
 \section{Coding Standard}
 
