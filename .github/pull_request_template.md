@@ -15,11 +15,6 @@
 
 Closes #
 
-## Visual Proof
-
-<!-- Screenshots of rendered PDF sections, dashboard/UI changes, or terminal output.
-     Write N/A with a reason if there is nothing to show. -->
-
 ## How to Review / Test
 
 <!-- What should the reviewer look at, and how can they verify it?
@@ -36,3 +31,7 @@ Closes #
 - [ ] Self-reviewed for correctness, clarity, and spelling/grammar
 - [ ] Code: commented in hard-to-understand areas, and tests added/updated (or explained why not)
 - [ ] Docs: builds with `make`, and meets level 4 of the rubric and the deliverable's checklist (or N/A)
+
+## Notes
+
+<!-- Optional: anything else reviewers should know. Delete this section if unused. -->
