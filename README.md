@@ -1,10 +1,16 @@
-# Project Name
+# Lake
 
 Developer Names:
+- Colin Chambachan
+- Jinwoo Hong
+- Matthew Nesbitt
+- Gary Qin
+- Ethan Walsh
 
 Date of project start:
+September 8, 2026
 
-This project is ...
+Distributed artificial intelligence inference for local edge devices.
 
 The folders and files for this project are as follows:
 

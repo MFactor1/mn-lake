@@ -2,4 +2,5 @@
 
 The folders and files for this folder are as follows:
 
-Describe ...
+- DevelopmentPlan.tex - 
+- DevelopmentPlan.pdf - 
