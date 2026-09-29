@@ -2,6 +2,7 @@
 
 \usepackage{booktabs}
 \usepackage{tabularx}
+\usepackage{hyperref}
 \usepackage{placeins}
 
 \title{Development Plan\\\progname}
@@ -523,14 +524,32 @@ AddressSanitizer in CI to catch memory bugs early.
 
 \section{Use of AI and LLMs}
 
-\wss{This section is a continuation of the previous section.  The role of LLMs
-in your project as important enough to warrant their own section.  
-How will your team be using LLMs for code and documentation development?  
-What tools will you be using?  How will you verify the output of your LLMs?}
+\subsection{AI Usage}
+Each member of the team will use LLMs for code generation to different extents.
+For members who use LLMs most extensively, LLMs will be used to write the majority of the code for the project.
+Coding tasks that LLMs will primarily be used for include boilerplate code, unit tests, \& in-line comments.
+LLMs will also be consulted as a second opinion for code reviews and verifying \& considering alternatives to
+architectural design decisions \& critical sections of the code.
+
+\subsection{AI Tools}
+The team will be using commercially-available Anthropic and OpenAI models (eg. Claude
+Opus/Sonnet, ChatGPT).
+
+\subsection{AI Verification}
+The team will verify the output of LLMs by ensuring all code is read \& reviewed by the
+LLM user \& at least 2 other members in a pull request. Due to the heavy usage of LLMs, Git commits
+will be atomic \& pull requests will not exceed 400 lines of changes to ensure every PR can be reasonably
+reviewed carefully. Additionally, unit tests will be used to verify all code correctness, and code linters 
+will be used to verify all code styling and syntax.
 
 \section{Coding Standard}
 
-\wss{What coding standard will you adopt?}
+The team will adopt industry-standard language-specific coding standards \& styles guides.
+For Python code, the \href{https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html}{Black}
+style guide and the \href{https://docs.astral.sh/ruff/linter/}{Ruff} linter will be used. For Rust code, the
+\href{https://rust-lang.github.io/rustfmt/?version=v1.10.0&search=}{rustfmt} formatter and
+\href{https://doc.rust-lang.org/clippy/lints.html}{Clippy} linter will be used. For JavaScript \& TypeScript files,
+\href{https://eslint.org/}{ESLint} and the \href{https://prettier.io/}{Prettier} formatter will be used.
 
 \newpage{}
 
