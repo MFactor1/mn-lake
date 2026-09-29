@@ -1,0 +1,27 @@
+name: Check Fixup Commits
+
+on:
+  pull_request:
+    branches: main
+
+jobs:
+  prevent-fixups:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for fixup or squash commits
+        run: |
+          FIXUPS=$(git log --format=%s ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E '^(fixup!|squash!)' || true)
+
+          if [ -n "$FIXUPS" ]; then
+            echo "Error: The following fixup/squash commits were found in this PR:"
+            echo "$FIXUPS"
+            echo "Please autosquash or rebase your commits before merging."
+            exit 1
+          else
+            echo "No fixup or squash commits found."
+          fi

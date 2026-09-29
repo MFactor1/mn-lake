@@ -22,62 +22,109 @@
 \toprule
 \textbf{Date} & \textbf{Developer(s)} & \textbf{Change}\\
 \midrule
-Date1 & Name(s) & Description of changes\\
-Date2 & Name(s) & Description of changes\\
-... & ... & ...\\
+September 25, 2026 & Ethan Walsh \& Jinwoo Hong & Creation of initial document \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \section{Problem Statement}
 
-\wss{You should check your problem statement with the
-\href{https://smiths.github.io/capTemplate/Checklists/ProbState-Checklist.pdf}
-{problem statement checklist}}. 
-
-\wss{You can change the section headings, as long as you include the required
-information.}
-
 \subsection{Problem}
 
-\wss{What problem are you trying to solve?  Why is it important? Do not talk
-about how you will solve the problem, only what the problem is.  AI is rarely
-part of the problem.  The problem is ``what'' you want to do, not ``how'' you
-want to do it.  The problem statement should be written in a way that is
-understandable to a non-technical audience.}
+As the use of artificial intelligence becomes more common, the most 
+popular option is to use a commercial large language model from a major inference 
+provider via a web interface or API (application programming interface). This approach is subject to variable costs 
+and insufficient data privacy protections. Although some users have opted for 
+open-source models on local devices, these models are often limited in quality 
+due to hardware restrictions. Users currently cannot access the benefits of 
+both approaches: low-cost, high-quality, private artificial intelligence. 
+Addressing this gap would create more democratized access to large language models.
 
 \subsection{Inputs and Outputs}
 
-\wss{Characterize the problem in terms of ``high level'' inputs and outputs.  
-Use abstraction so that you can avoid details.}
+Inputs:
+
+\begin{itemize}
+    \item A large language model
+    \item A user's local device(s)
+    \item User inputs to the interface (clicks)
+    \item User's prompt to the distributed model
+\end{itemize}
+
+Outputs:
+\begin{itemize}
+    \item User Interface (more specifically, output from the model)
+    \item Output from a model that was parallelized across >1 device
+\end{itemize}
 
 \subsection{Stakeholders}
 
+Stakeholders include, but are not limited to:
+
+\begin{itemize}
+    \item Local AI users who run models on their own device(s)
+    \item Small companies in regulated industries (more specifically, industries where data privacy is paramount)
+    \item Low-budget and smaller AI labs focusing on research related to AI models
+\end{itemize}
+
+An example of a small company in a regulated industry is a local medical clinic. This clinic may require AI or computer vision based analysis of patient scan results but this data must remain private.
+
 \subsection{Environment}
 
-\wss{Hardware and Software Environment for the users.  The developer environment
-is summarized as part of the developer plan.}
+\subsubsection{Hardware}
+
+Hardware used for this project includes consumer devices such as personal computers and laptops. Mobile phones may also be used in the final iteration of the project but is not in-scope for the initial proof of concept.
+Hardware compatability will be limited to devices containing GPUs (graphics processing units) manufactured by Nvidia, AMD, or Apple. Any hardware requirements beyond this will be specified and listed as the project moves further into the development phase.
+
+\subsubsection{Software}
+
+Software must be compatible with various operating systems to be compatible on consumer devices. This includes Windows, Linux, and MacOS.
 
 \section{Goals}
 
+\subsection{Improved Local Performance Outcomes:}
+The system's model will achieve better performance than if the equivalent model is only run on one device. The aim of this goal is to generally improve local AI outcomes and performance so that the product can become a viable alternative to commercial LLMs for simple tasks. ''Better'' will be measured in a variety of metrics including:
+\begin{itemize}
+    \item Response time
+    \item Throughput (tokens per second)
+    \item Model benchmarking
+    \item Model size that can be accommodated (number of parameters and quantization)
+\end{itemize}
+
+\subsection{Model Parallelization}
+This goal is the motivating question that brought about this project: can a model be parallelized across multiple local devices and run successfully by producing coherent output? This goal is defined as the system parallelizing an artificial intelligence model (more specifically, a large language model based on the transformer architecture) across more than one local device. Currently, this goal will be considered met when the system is able to split up the layers of a model across the pool of available devices.
+    
+\subsection{Cross-Platform Optimization}
+The system is able to operate across different operating systems and platforms (e.g. Windows, Mac, and Linux) so that users may easily connect their devices. Achieving this will result in the user base not being limited based on their existing device type.
+
+\subsection{Dynamic Allocation}
+In the case goal 2.2 can be achieved (model parallelization), the system can dynamically allocate the parallelized model across the pool of available devices.
+This is a key shortcoming of existing local distributed inference providers that only do one allocation pass at the start of the session. By achieving this goal, the system would be more efficient and resilient since it can continue to operate as devices drop or are added to the network.
+
 \section{Stretch Goals}
 
-\wss{Goals you hope to get to, but not necessary.  They are also helpful if the
-scope of the original project needs to be expanded.}
+\subsection{Wired and Wireless Connections}
+The system can operate via both wired and wireless connection (v0: wired, v1+: wireless). The network latency and variability imposed by a wireless connection may make the distributed system throughput too low for practical use.
+
+\subsection{Extended Cross-Platform Support for Smartphones}
+iOS and Android inference is commonly supported by inference engines, but practical feasibility of distributing inference to smartphones remains unknown, due to the limitations of smartphone hardware.
+
+\subsection{Concurrent Inference}
+The distributed system can serve inference to at least two concurrent users at the same time, rather than completing singular requests sequentially. Each request must keep its own state so user outputs do not interfere with one another. This would improve aggregate throughput and observed latency when multiple users are using the model.
+
+\subsection{Privacy and Security}
+Communication between devices is encrypted, protecting requests and intermediate data from other devices that may be observing the network. Devices can also authenticate before joining the network cluster, protecting data in transit and ensuring only trusted devices are utilized.
 
 \section{Custom Documents (CDs)}
 
-\wss{For CAS 741: State whether the project is a research project. This
-designation, with the approval (or request) of the instructor, can be modified
-over the course of the term.}
+\begin{itemize}
+    \item \textbf{Fall:} Design Thinking Report
+    \item \textbf{Winter:} Performance Report
+\end{itemize}
 
-\wss{For SE Capstone: List your custom documents (CDs).  Potential CDs include
-usability testing, code walkthroughs, user documentation, formal proof,
-GenderMag personas, Design Thinking, etc.  (The full list is on the course
-outline and in Lecture 02.) Normally the number of CDs will be two (one per
-term).  Approval of the CDs will be part of the discussion with the instructor
-for approving the project. The CDs, with the approval (or request) of the
-instructor, can be modified over the course of the term.}
+\section{Generative AI Use Disclosure}
+Anthropic's Claude Sonnet 5 was used as a method to provide feedback on early revisions of the problem statement (rubric and example problem statements from the capstone GitLab were provided as context). No text generated by the model was used and only general suggestions were used as guidelines for improvement.
+Google's AI (built into search functionality) was also used as a method to provide feedback on the environment section (however feedback was largely ignored and deemed to be unhelpful).
 
 \newpage{}
 
