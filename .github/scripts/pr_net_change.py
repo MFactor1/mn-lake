@@ -45,9 +45,42 @@ def classify(path):
 
 def numstat(base, head):
     """Yield (added, deleted, path) for each file, None counts for binaries."""
+    # git diff --numstat -z -M base...head:
+    #   --numstat  one line per changed file: lines added, lines deleted and
+    #              the path, separated by tabs. Binary files have no line
+    #              counts, so both show "-".
+    #   -M         detects renames, so a moved file is counted by what
+    #              changed in it rather than as a whole delete plus add.
+    #   base...head
+    #              three dots diff head against its merge base with base,
+    #              so only the pull request's own changes are counted, not
+    #              whatever landed on base since the branch was made.
+    #   -z         ends each record with a NUL instead of a newline and
+    #              leaves paths unquoted, so any filename parses safely.
+    #
+    # Without -z, a changed file, a binary file and a rename look like:
+    #
+    #   2       0       README.md
+    #   -       -       logo.png
+    #   1       0       old.py => new.py
+    #
+    # With -z (each record on its own line here for readability), the
+    # rename's two paths get their own NUL-ended fields:
+    #
+    #   2\t0\tREADME.md\0
+    #   -\t-\tlogo.png\0
+    #   1\t0\t\0old.py\0new.py\0
     out = subprocess.run(
         ["git", "diff", "--numstat", "-z", "-M", f"{base}...{head}"],
         check=True, capture_output=True, text=True).stdout
+    # fields is that output split on NUL, so for the example above:
+    #
+    #   ["2\t0\tREADME.md", "-\t-\tlogo.png", "1\t0\t", "old.py", "new.py", ""]
+    #
+    # i is the index of the next record's counts. A normal file uses one
+    # field, and a rename uses three (counts with an empty path, old path,
+    # new path). The trailing NUL leaves an empty last field, which ends the
+    # loop.
     fields = out.split("\0")
     i = 0
     while i < len(fields) and fields[i]:
