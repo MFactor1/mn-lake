@@ -1,0 +1,70 @@
+{
+  "_comment": "Maps a docs/ path prefix to the rubric files (in capstoneCEGJM/rubrics, under rubrics/) that grade it. A pull request touching anything under a prefix gets that prefix's rubrics applied to the whole document. Read by .github/scripts/rubric_review.py.",
+
+  "docs/ProblemStatementAndGoals/": [
+    "problem-statement-goals-and-development-plan.md"
+  ],
+  "docs/DevelopmentPlan/": [
+    "problem-statement-goals-and-development-plan.md",
+    "lo13-eval-tools.md"
+  ],
+  "docs/SRS/": [
+    "srs.md",
+    "lo-assumptions.md",
+    "lo-standards.md",
+    "lo-impact.md",
+    "lo-ext-knowledge.md",
+    "lo-spec-math.md",
+    "lo-reflect-srs.md"
+  ],
+  "docs/SRS_Reflection.text": [
+    "lo-reflect-srs.md"
+  ],
+  "docs/HazardAnalysis/": [
+    "hazard-analysis.md",
+    "lo-standards.md",
+    "lo-impact.md"
+  ],
+  "docs/VnVPlan/": [
+    "vnv-plan.md",
+    "lo-plan.md",
+    "lo-reflect-vnv-plan.md"
+  ],
+  "docs/Design/": [
+    "desdoc.md",
+    "desdoc-revision-minus-1.md",
+    "lo-spec-math-dd.md",
+    "lo-prob-solutions-dd.md",
+    "lo-explores-dd.md"
+  ],
+  "docs/VnVReport/": [
+    "vnv-report.md",
+    "lo-synthesize-vnv-report.md",
+    "lo-reflect-vnv-report.md"
+  ],
+  "docs/ReflectAndTrace/": [
+    "lo12-reflect-and-trace.md",
+    "lo11-prototype-iterate.md",
+    "lo19-economic-principles.md",
+    "lo20-manage.md",
+    "ethics-and-equity.md"
+  ],
+  "docs/UserGuide/": [
+    "final-doc-revision-1.md"
+  ],
+  "docs/projMngmnt/": [
+    "rev-0-demo.md"
+  ],
+  "docs/Presentations/D0_ProofOfConceptDemo/": [
+    "poc-demo.md"
+  ],
+  "docs/Presentations/D1_Rev0Demo/": [
+    "rev-0-demo.md"
+  ],
+  "docs/Presentations/D2_FinalPresentation/": [
+    "final-demo.md"
+  ],
+  "docs/Presentations/D3_EXPO/": [
+    "expo.md"
+  ]
+}
