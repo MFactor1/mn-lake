@@ -4,8 +4,9 @@
 For every ``docs/`` prefix in ``rubric-map.json`` that the pull request
 touches, the whole document at ``head`` (every .tex/.md/.text file under the
 prefix), the PR's diff for it, and the rubric text are sent to Gemini, which
-is asked for a per-criterion assessment.  The combined Markdown comment body
-is printed on stdout.  The first line is a hidden marker the workflow uses
+returns a per-criterion assessment as JSON.  That is rendered with the
+criteria losing marks first (reason and fix for each) and the rest folded
+away, and the combined Markdown comment body is printed on stdout.  The first line is a hidden marker the workflow uses
 to find and update its earlier comment instead of posting a new one on
 every push.
 
@@ -50,34 +51,28 @@ You are a teaching assistant for a software engineering capstone course,
 marking a team's document against the course rubric. Be direct and specific;
 the team wants to know what would cost them marks, not encouragement.
 
-The document is written in LaTeX. Judge the content, not the markup. Several
-rubric rows cannot be judged from the document alone (attendance at a
-presentation, GitHub issues created for another team, demos, code review
-interviews): mark those "n/a (not in document)" and move on. If the rubric
-covers more than one document (for example the Problem Statement and the
-Development Plan) and only one of them is given, mark the other document's
-rows "n/a (other document)" rather than scoring them as missing.
+The document is written in LaTeX. Judge the content, not the markup.
 
-Produce GitHub-flavoured Markdown with exactly these sections:
+Assess every criterion in the rubric, in rubric order. For each one decide:
 
-### Criteria
+- "judged": you can assess it from the document. Give the level you would
+  award (the rubric's own level name and points) and the top level's name
+  and points for that criterion.
+- "na": it cannot be judged from the document alone. This covers attendance
+  at a presentation or demo, GitHub issues created for another team, code
+  review interviews, and rows that belong to a different document when the
+  rubric covers several (for example the Problem Statement rows when only
+  the Development Plan is given). Do not score these as missing.
 
-A table with columns: Criterion | Likely level | Why. One row per rubric
-criterion, in rubric order. "Likely level" is the rubric's own level name and
-points (for example "Meets (2)"). "Why" is one or two sentences naming what
-is present or missing, quoting or pointing at the document where that helps.
+For a judged criterion that is below the top level, "why" must name the
+concrete thing that is missing or wrong, pointing at the section or quoting
+the document, and "fix" must say exactly what to add or change to reach the
+top level. For a criterion already at the top level, "why" is one short
+clause saying what earns it; "fix" is empty. Keep "why" under 30 words and
+"fix" under 40 words. Never pad.
 
-### Before submitting
-
-A numbered list of at most five changes, most marks-per-effort first, each
-saying which criterion it serves. Skip anything the document already does.
-
-### This PR
-
-Two or three sentences: which criteria the PR's diff moved, and whether it
-introduced anything the rubric penalises.
-
-Do not add other sections, a preamble, or an overall grade.
+"pr_note" is one or two sentences: which criteria this PR's diff moved (if
+any) and whether it introduced anything the rubric penalises.
 
 === RUBRIC ===
 {rubric}
@@ -88,6 +83,33 @@ Do not add other sections, a preamble, or an overall grade.
 === DIFF (what this PR changed) ===
 {diff}
 """
+
+# Gemini is held to this shape so the comment can be rendered the same way
+# every time, with the rows that lose marks pulled out in front.
+RESPONSE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "criteria": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "status": {"type": "string", "enum": ["judged", "na"]},
+                    "level": {"type": "string"},
+                    "points": {"type": "number"},
+                    "max_points": {"type": "number"},
+                    "max_level": {"type": "string"},
+                    "why": {"type": "string"},
+                    "fix": {"type": "string"},
+                },
+                "required": ["name", "status", "why"],
+            },
+        },
+        "pr_note": {"type": "string"},
+    },
+    "required": ["criteria", "pr_note"],
+}
 
 
 def git(*args):
@@ -135,11 +157,15 @@ def rubric_text(rubrics_dir, files):
 
 
 def call_gemini(model, api_key, prompt):
-    """Return the model's text. Retries the free tier's rate limiting."""
+    """Return the model's JSON text. Retries the free tier's rate limiting."""
     url = API.format(model=model) + "?key=" + api_key
     body = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.2},
+        "generationConfig": {
+            "temperature": 0.2,
+            "responseMimeType": "application/json",
+            "responseSchema": RESPONSE_SCHEMA,
+        },
     }).encode()
     delay = 10
     for attempt in range(5):
@@ -162,6 +188,62 @@ def call_gemini(model, api_key, prompt):
         except (KeyError, IndexError) as err:
             raise RuntimeError(f"Unexpected Gemini response: {data}") from err
     raise RuntimeError("Gemini: gave up after retries")
+
+
+def render(review):
+    """Turn the model's JSON into the comment body for one deliverable.
+
+    Criteria that lose marks come first, each with the reason and the fix,
+    since those are what the team acts on. Full-mark rows and rows that
+    can't be judged from the document are folded away so they don't bury
+    the rest.
+    """
+    short, full, na = [], [], []
+    for c in review["criteria"]:
+        if c.get("status") == "na":
+            na.append(c)
+        elif c.get("points") is not None and c.get("max_points") is not None \
+                and c["points"] < c["max_points"]:
+            short.append(c)
+        else:
+            full.append(c)
+
+    def pts(c):
+        level = c.get("level") or "?"
+        if c.get("points") is None or c.get("max_points") is None:
+            return level
+        return f"{level} ({c['points']:g}/{c['max_points']:g})"
+
+    out = [f"**{len(full)} ✅ full marks · {len(short)} ⚠️ losing marks · "
+           f"{len(na)} ➖ not judged from the document**"]
+
+    if short:
+        out.append("### ⚠️ Losing marks")
+        for c in sorted(short, key=lambda c: c["points"] - c["max_points"]):
+            # Two or more levels down gets the louder icon.
+            icon = "🔴" if c["max_points"] - c["points"] >= 2 else "⚠️"
+            top = c.get("max_level") or "top level"
+            out.append(f"**{icon} {c['name']}** — {pts(c)} → top is "
+                       f"**{top}** ({c['max_points']:g})\n"
+                       f"- **Why:** {c['why'].strip()}\n"
+                       f"- **Fix:** {c.get('fix', '').strip() or 'n/a'}")
+    else:
+        out.append("### ✅ Nothing below the top level")
+
+    if full:
+        rows = "\n".join(f"- {c['name']} — {pts(c)}: {c['why'].strip()}"
+                         for c in full)
+        out.append(f"<details><summary>✅ Full marks ({len(full)})</summary>\n\n"
+                   f"{rows}\n\n</details>")
+    if na:
+        rows = "\n".join(f"- {c['name']}: {c['why'].strip()}" for c in na)
+        out.append(f"<details><summary>➖ Not judged from the document "
+                   f"({len(na)})</summary>\n\n{rows}\n\n</details>")
+
+    note = review.get("pr_note", "").strip()
+    if note:
+        out.append(f"**This PR:** {note}")
+    return "\n\n".join(out)
 
 
 def deliverables(mapping, files):
@@ -207,11 +289,18 @@ def main():
         if args.dry_run:
             sections.append(f"{title}\n\n```\n{prompt}\n```")
             continue
+        raw = ""
         try:
-            review = call_gemini(args.model, api_key, prompt)
+            raw = call_gemini(args.model, api_key, prompt)
+            body = render(json.loads(raw))
         except RuntimeError as err:
-            review = f"Review failed: {err}"
-        sections.append(f"{title}\n\n{review.strip()}")
+            body = f"Review failed: {err}"
+        except (ValueError, KeyError, TypeError) as err:
+            # Schema-constrained output should always parse; if it doesn't,
+            # show what came back rather than nothing.
+            body = (f"Review came back in an unexpected shape ({err}):\n\n"
+                    f"```\n{raw[:4000]}\n```")
+        sections.append(f"{title}\n\n{body}")
 
     sections.append(f"<sub>Reviewed by `{args.model}` against the rubrics in "
                     "`capstoneCEGJM/rubrics`. Advisory only; a TA may read "
