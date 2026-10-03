@@ -42,22 +42,31 @@ marking a team's document against the course rubric. Be direct and specific;
 the team wants to know what would cost them marks, not encouragement. The
 document is LaTeX: judge the content, not the markup.
 
-Assess every rubric criterion, in rubric order. Each is either
-- "judged": assessable from the document. Give the level you would award
-  (the rubric's own level name and points) and the top level's name and
-  points for that criterion; or
-- "na": not assessable from the document alone: attendance at a presentation
+This review is of the pull request, not the whole document. The full
+document is given only as context so you can judge the changed parts
+correctly. Go through every rubric criterion, in rubric order, and give each
+one status:
+- "judged": the diff adds, removes or rewrites material this criterion
+  grades. Judge that material as it now stands in the document, and give the
+  level you would award (the rubric's own level name and points) and the
+  top level's name and points for that criterion;
+- "untouched": the diff does not affect what this criterion grades. Do not
+  assess it; "why" is empty;
+- "na": not assessable from a document at all: attendance at a presentation
   or demo, GitHub issues created for another team, code review interviews,
   and rows belonging to a different document when the rubric covers several
   (e.g. Problem Statement rows when only the Development Plan is given).
-  Never score these as missing.
+Pre-existing shortcomings the diff did not go near are "untouched", not
+"judged". If the diff only changes comments, whitespace or formatting with
+no bearing on any criterion, every row is "untouched".
 
-Below the top level, "why" names the concrete thing missing or wrong,
-pointing at the section or quoting the document, and "fix" says exactly what
-to add or change to reach the top level. At the top level, "why" is one
-short clause on what earns it and "fix" is empty. "why" under 30 words,
-"fix" under 40. "pr_note" is one or two sentences: which criteria this PR's
-diff moved, if any, and whether it introduced anything the rubric penalises.
+For a judged criterion below the top level, "why" names the concrete thing
+missing or wrong in the changed material, pointing at the section or quoting
+it, and "fix" says exactly what to add or change to reach the top level. At
+the top level, "why" is one short clause on what earns it and "fix" is
+empty. "why" under 30 words, "fix" under 40. "pr_note" is one or two
+sentences on what the diff changed overall and whether it introduced
+anything the rubric penalises.
 
 === RUBRIC ===
 {rubric}
@@ -81,7 +90,7 @@ RESPONSE_SCHEMA = {
             "type": "object", "required": ["name", "status", "why"],
             "properties": {k: {"type": t} for k, t in _FIELDS.items()}}}}}
 RESPONSE_SCHEMA["properties"]["criteria"]["items"]["properties"]["status"][
-    "enum"] = ["judged", "na"]
+    "enum"] = ["judged", "untouched", "na"]
 
 
 def git(*args):
@@ -140,11 +149,12 @@ class QuotaExhausted(RuntimeError):
 
 def render(review):
     """Comment body for one deliverable: criteria losing marks first, each
-    with the reason and the fix; full-mark and not-judged rows folded away."""
-    short, full, na = [], [], []
+    with the reason and the fix; the other rows folded away."""
+    short, full, skip, na = [], [], [], []
     for c in review["criteria"]:
         scored = c.get("points") is not None and c.get("max_points") is not None
-        (na if c.get("status") == "na" else
+        status = c.get("status")
+        (na if status == "na" else skip if status == "untouched" else
          short if scored and c["points"] < c["max_points"] else full).append(c)
 
     def pts(c):
@@ -153,9 +163,12 @@ def render(review):
             return level
         return f"{level} ({c['points']:g}/{c['max_points']:g})"
 
-    out = [f"**{len(full)} ✅ full marks · {len(short)} ⚠️ losing marks · "
-           f"{len(na)} ➖ not judged from the document**"]
-    if short:
+    out = [f"**Of the criteria this PR touches: {len(full)} ✅ full marks · "
+           f"{len(short)} ⚠️ losing marks** · {len(skip)} untouched · "
+           f"{len(na)} not judgeable from a document"]
+    if not short and not full:
+        out.append("### ➖ This PR doesn't change anything the rubric grades")
+    elif short:
         out.append("### ⚠️ Losing marks")
         for c in sorted(short, key=lambda c: c["points"] - c["max_points"]):
             icon = "🔴" if c["max_points"] - c["points"] >= 2 else "⚠️"
@@ -170,9 +183,13 @@ def render(review):
         rows = "\n".join(f"- {c['name']} — {pts(c)}: {c['why'].strip()}" for c in full)
         out.append(f"<details><summary>✅ Full marks ({len(full)})</summary>"
                    f"\n\n{rows}\n\n</details>")
+    if skip:
+        out.append(f"<details><summary>Untouched by this PR ({len(skip)})"
+                   f"</summary>\n\n" + ", ".join(c["name"] for c in skip)
+                   + "\n\n</details>")
     if na:
         rows = "\n".join(f"- {c['name']}: {c['why'].strip()}" for c in na)
-        out.append(f"<details><summary>➖ Not judged from the document "
+        out.append(f"<details><summary>Not judgeable from a document "
                    f"({len(na)})</summary>\n\n{rows}\n\n</details>")
     if review.get("pr_note", "").strip():
         out.append(f"**This PR:** {review['pr_note'].strip()}")
