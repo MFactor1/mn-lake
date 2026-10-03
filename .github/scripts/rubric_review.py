@@ -130,21 +130,22 @@ def call_gemini(model, api_key, prompt):
                 data = json.load(resp)
             return data["candidates"][0]["content"]["parts"][0]["text"]
         except urllib.error.HTTPError as err:
-            # 429: free-tier requests per minute; 503: overloaded.
-            if err.code in (429, 503) and attempt < 4:
-                print(f"gemini {err.code}, retrying in {delay}s", file=sys.stderr)
-                time.sleep(delay)
-                delay *= 2
-                continue
-            detail = err.read().decode(errors="replace")[:500]
-            raise RuntimeError(f"Gemini HTTP {err.code}: {detail}") from err
+            # 429: free-tier quota; 503: overloaded. Both are worth waiting
+            # out, and after the last wait, worth trying the other model.
+            if err.code not in (429, 503):
+                detail = err.read().decode(errors="replace")[:500]
+                raise RuntimeError(f"Gemini HTTP {err.code}: {detail}") from err
+            if attempt == 4:
+                raise QuotaExhausted(f"{model}: still HTTP {err.code} after retries") from err
+            print(f"gemini {err.code}, retrying in {delay}s", file=sys.stderr)
+            time.sleep(delay)
+            delay *= 2
         except (KeyError, IndexError) as err:
             raise RuntimeError(f"Unexpected Gemini response: {data}") from err
-    raise QuotaExhausted(model)
 
 
 class QuotaExhausted(RuntimeError):
-    """Still 429/503 after every retry: the model's quota is used up."""
+    """Still 429/503 after every retry: the model is out of quota or down."""
 
 
 def render(review):
