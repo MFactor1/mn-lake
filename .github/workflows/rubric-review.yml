@@ -1,0 +1,97 @@
+name: Rubric Review
+
+# Comments on a pull request with how each changed document measures up
+# against its course rubric, judged by Gemini. Folder -> rubric is in
+# .github/rubric-map.json; the rubric text is in the private
+# capstoneCEGJM/rubrics repo.
+#
+# pull_request_target for the same reason as pr-net-change: fork PRs could
+# not comment otherwise. The checkout is the base branch; the head is only
+# fetched as git objects to read, never run. Document text from the PR does
+# go to Gemini, so a PR could try to steer its own review comment, but the
+# token can't do anything beyond commenting. Edits here or to the script
+# only take effect once on main; workflow_dispatch with a PR number lets a
+# merged version be rerun by hand.
+on:
+  pull_request_target:
+    branches: main
+    types: [opened, synchronize, reopened]
+    paths: [docs/**]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number to review
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: rubric-review-${{ github.event.pull_request.number || inputs.pr }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Find the pull request's commits
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number || inputs.pr }}
+        run: |
+          # A manual run has only the number, so look the SHAs up.
+          read -r BASE HEAD < <(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" \
+                                  --jq '.base.sha + " " + .head.sha')
+          git fetch --no-tags origin "refs/pull/$PR/head"
+          printf 'number=%s\nbase=%s\nhead=%s\n' "$PR" "$BASE" "$HEAD" >> "$GITHUB_OUTPUT"
+
+      # RUBRICS_TOKEN is a fine-grained PAT scoped to that one repo with
+      # Contents: read and nothing else.
+      - name: Checkout rubrics
+        uses: actions/checkout@v5
+        with:
+          repository: capstoneCEGJM/rubrics
+          token: ${{ secrets.RUBRICS_TOKEN }}
+          path: rubrics-private
+
+      - name: Review against rubrics
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Optional repository variables; the script has defaults for both.
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GEMINI_FALLBACK_MODEL: ${{ vars.GEMINI_FALLBACK_MODEL }}
+        run: |
+          python3 .github/scripts/rubric_review.py \
+            --base "${{ steps.pr.outputs.base }}" \
+            --head "${{ steps.pr.outputs.head }}" \
+            --rubrics-dir rubrics-private/rubrics \
+            ${GEMINI_MODEL:+--model "$GEMINI_MODEL"} \
+            ${GEMINI_FALLBACK_MODEL:+--fallback-model "$GEMINI_FALLBACK_MODEL"} \
+            > "$RUNNER_TEMP/comment.md"
+          cat "$RUNNER_TEMP/comment.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post or update comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.pr.outputs.number }}
+        run: |
+          # Edit the comment from the previous push, found by its marker.
+          ID=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+                 --jq '.[] | select(.user.login == "github-actions[bot]")
+                           | select(.body | startswith("<!-- rubric-review -->"))
+                           | .id' | head -1)
+          if [ -n "$ID" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$ID" \
+              -F body=@"$RUNNER_TEMP/comment.md" > /dev/null
+          else
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+              -F body=@"$RUNNER_TEMP/comment.md" > /dev/null
+          fi
