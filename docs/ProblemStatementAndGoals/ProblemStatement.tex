@@ -121,8 +121,7 @@ This goal is the motivating question that brought about this project: can a mode
 The system is able to operate across different operating systems and platforms (e.g. Windows, Mac, and Linux) so that users may easily connect their devices. Achieving this will result in the user base not being limited based on their existing device type.
 
 \subsection{Dynamic Allocation}
-In the case goal 2.2 can be achieved (model parallelization), the system can dynamically allocate the parallelized model across the pool of available devices.
-This is a key shortcoming of existing local distributed inference providers that only do one allocation pass at the start of the session. By achieving this goal, the system would be more efficient and resilient since it can continue to operate as devices drop or are added to the network.
+In the case goal 2.2 can be achieved (model parallelization), the system can dynamically allocate the parallelized model across the pool of available devices. This can be done when a device joins or leaves the network, given that there are sufficient pooled resources to run the model. This is a key shortcoming of existing local distributed inference providers that only do one allocation pass at the start of the session. By achieving this goal, the system would be more efficient and resilient since it can continue to operate as devices drop or are added to the network. The success of the goal will be evaluated by verifying that the distributed model can serve requests after model layers are reassigned, as well as measuring the reallocation time.
 
 \section{Stretch Goals}
 
