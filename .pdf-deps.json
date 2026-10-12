@@ -92,7 +92,8 @@
     "docs/Common.text",
     "docs/Reflection.text",
     "docs/SRS/SRS.tex",
-    "docs/SRS_Reflection.text"
+    "docs/SRS_Reflection.text",
+    "refs/References.bib"
   ],
   "docs/UserGuide/UserGuide.tex": [
     "docs/Comments.text",
