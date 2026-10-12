@@ -1,266 +1,621 @@
-% THIS DOCUMENT IS FOLLOWS THE VOLERE TEMPLATE BY Suzanne Robertson and James Robertson
-% ONLY THE SECTION HEADINGS ARE PROVIDED
+% Software Requirements Specification following the Meyer PEGS template
+% (Goals, Environment, System, Project) from Bertrand Meyer's "Handbook of
+% Requirements and Business Analysis" (2022).
 %
-% Initial draft from https://github.com/Dieblich/volere
+% The LaTeX structure is adapted from the Meyer-template SRS written by the
+% AlgoCatan team, shared with us by our TA:
+% https://github.com/AlgoCatan/RLCatan/blob/main/docs/SRS/SRS.tex
+% Their project content has been removed; only the structure, numbering
+% mechanics and table layouts are kept. Deviations from Meyer's original
+% template are listed in "Changes from Original SRS Meyer Template".
 %
-% Risks are removed because they are covered by the Hazard Analysis
+% Template guidance is written with \plt{...} (cyan). Delete each note once
+% the section it describes has been written.
+
 \documentclass[12pt]{article}
 
-\usepackage{booktabs}
 \usepackage{tabularx}
-\usepackage{hyperref}
-\hypersetup{
-    bookmarks=true,         % show bookmarks bar?
-      colorlinks=true,      % false: boxed links; true: colored links
-    linkcolor=red,          % color of internal links (change box color with linkbordercolor)
-    citecolor=green,        % color of links to bibliography
-    filecolor=magenta,      % color of file links
-    urlcolor=cyan           % color of external links
-}
-
-\newcommand{\lips}{\textit{Insert your content here.}}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amstext}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{zed-csp}     % Z notation, for S.9 Formalizations (optional)
+\usepackage{placeins}
+\usepackage{pdflscape}
+\usepackage{caption}
+\usepackage[round]{natbib}
 
 \input{../Comments.text}
 \input{../Common.text}
 
-\begin{document}
+% ---------------------------------------------------------------------------
+% PEGS chapter macro. Meyer's template numbers subsections as G.1, E.2, S.3,
+% P.4 etc. Each chapter is an unnumbered section with a manual TOC entry, and
+% the subsection counter is reset with the chapter letter as its prefix.
+% ---------------------------------------------------------------------------
+\newcommand{\pegschapter}[2]{%
+  \newpage
+  \phantomsection
+  \section*{(#1) #2}\label{sec:srs-#1}
+  \addcontentsline{toc}{section}{(#1) #2}
+  \renewcommand{\thesubsection}{#1.\arabic{subsection}}
+  \renewcommand{\theHsubsection}{#1.\arabic{subsection}}
+  \setcounter{subsection}{0}%
+}
 
-\title{Software Requirements Specification for \progname: subtitle describing software} 
+% Unnumbered section that still appears in the table of contents.
+\newcommand{\tocsection}[1]{%
+  \phantomsection
+  \section*{#1}
+  \addcontentsline{toc}{section}{#1}%
+}
+
+\title{Software Requirements Specification for \progname: subtitle describing software}
 \author{\authname}
 \date{\today}
-	
+
+\begin{document}
+
 \maketitle
+\thispagestyle{empty}
 
 ~\newpage
 
 \pagenumbering{roman}
 
-\tableofcontents
-
-~\newpage
-
-\section*{Revision History}
-
-\begin{tabularx}{\textwidth}{p{3cm}p{2cm}X}
-\toprule {\textbf{Date}} & {\textbf{Version}} & {\textbf{Notes}}\\
+\begin{table}[hp]
+\caption{Revision History} \label{TblRevisionHistory}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Date} & \textbf{Developer(s)} & \textbf{Change}\\
 \midrule
-Date 1 & 1.0 & Notes\\
-Date 2 & 1.1 & Notes\\
+2026-10-09 & Colin Chambachan & Switch from the Volere template to the Meyer template\\
+Date2 & Name(s) & Description of changes\\
+... & ... & ...\\
 \bottomrule
 \end{tabularx}
-
-~\\
+\end{table}
 
 ~\newpage
-\section{Purpose of the Project}
-\subsection{User Business}
-\lips
-\subsection{Goals of the Project}
-\lips
-\section{Stakeholders}
-\subsection{Client}
-\lips
-\subsection{Customer}
-\lips
-\subsection{Other Stakeholders}
-\lips
-\subsection{Hands-On Users of the Project}
-\lips
-\subsection{Personas}
-\lips
-\subsection{Priorities Assigned to Users}
-\lips
-\subsection{User Participation}
-\lips
-\subsection{Maintenance Users and Service Technicians}
-\lips
 
-\section{Mandated Constraints}
-\subsection{Solution Constraints}
-\lips
-\subsection{Implementation Environment of the Current System}
-\lips
-\subsection{Partner or Collaborative Applications}
-\lips
-\subsection{Off-the-Shelf Software}
-\lips
-\subsection{Anticipated Workplace Environment}
-\lips
-\subsection{Schedule Constraints}
-\lips
-\subsection{Budget Constraints}
-\lips
-\subsection{Enterprise Constraints}
-\lips
+\tableofcontents
 
-\section{Naming Conventions and Terminology}
-\subsection{Glossary of All Terms, Including Acronyms, Used by Stakeholders
-involved in the Project}
-\lips
+\listoftables
 
-\section{Relevant Facts And Assumptions}
-\subsection{Relevant Facts}
-\lips
-\subsection{Business Rules}
-\lips
-\subsection{Assumptions}
-\lips
+\listoffigures
 
-\section{The Scope of the Work}
-\subsection{The Current Situation}
-\lips
-\subsection{The Context of the Work}
-\lips
-\subsection{Work Partitioning}
-\lips
-\subsection{Specifying a Business Use Case (BUC)}
-\lips
+~\newpage
 
-\section{Business Data Model and Data Dictionary}
-\subsection{Business Data Model}
-\lips
-\subsection{Data Dictionary}
-\lips
+\pagenumbering{arabic}
 
-\section{The Scope of the Product}
-\subsection{Product Boundary}
-\lips
-\subsection{Product Use Case Table}
-\lips
-\subsection{Individual Product Use Cases (PUC's)}
-\lips
+% ===========================================================================
+\tocsection{Changes from Original SRS Meyer Template}
 
-\section{Functional Requirements}
-\subsection{Functional Requirements}
-\lips
+\plt{Meyer's template is a book chapter, not a course template, so every team
+adapts it. Record each structural change you make and why, so a reader who
+knows the original can follow this document. The rows below describe the
+adaptations already present in this file; add to them as the document evolves.}
 
-\section{Look and Feel Requirements}
-\subsection{Appearance Requirements}
-\lips
-\subsection{Style Requirements}
-\lips
+\begin{table}[H]
+\caption{Changes from Template} \label{ChangesFromTemplate}
+\begin{tabularx}{\textwidth}{|p{4.5cm}|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Change} & \textbf{Reason} \\
+\hline
+Glossary (E.1) moved to the front of the document & Terms and acronyms must be defined before first use, and information should live in one place. E.1 now points here. \\
+\hline
+Requirement tables added to each PEGS chapter & Meyer's template describes requirements in prose. Labelled tables of functional (FR) and non-functional (NFR) requirements give each requirement an ID that can be prioritized, traced and verified. \\
+\hline
+Added G.8 User Profiles & Meyer lists stakeholders (G.7) but has no place for the distinct characteristics of each user group. \\
+\hline
+Added E.7 Standards and Legal/Regulatory Factors & Meyer's Environment chapter has no explicit home for standards, licensing or legal constraints. \\
+\hline
+Added S.4 Normal Operation and S.5 Undesired Event Handling & Separates expected behaviour from error handling instead of mixing both into S.2 Functionality. \\
+\hline
+Added S.9 Formalizations & Provides a place for mathematical or formal specification of the parts of the system that benefit from it. \\
+\hline
+Added Safety and Security Requirements & Lets the requirements from the Hazard Analysis be ported into this document. \\
+\hline
+Added Requirement Dependencies & Shows traceability between requirements visually. \\
+\hline
+Added References & Meyer's template has no references section. \\
+\hline
+Added Appendices (Generative AI Use Disclosure, Reflection) & Required by the course. \\
+\hline
+\end{tabularx}
+\end{table}
 
-\section{Usability and Humanity Requirements}
-\subsection{Ease of Use Requirements}
-\lips
-\subsection{Personalization and Internationalization Requirements}
-\lips
-\subsection{Learning Requirements}
-\lips
-\subsection{Understandability and Politeness Requirements}
-\lips
-\subsection{Accessibility Requirements}
-\lips
+% ===========================================================================
+\tocsection{Glossary}
+\label{sec:glossary}
 
-\section{Performance Requirements}
-\subsection{Speed and Latency Requirements}
-\lips
-\subsection{Safety-Critical Requirements}
-\lips
-\subsection{Precision or Accuracy Requirements}
-\lips
-\subsection{Robustness or Fault-Tolerance Requirements}
-\lips
-\subsection{Capacity Requirements}
-\lips
-\subsection{Scalability or Extensibility Requirements}
-\lips
-\subsection{Longevity Requirements}
-\lips
+\plt{Define every domain term and acronym used in this document, in
+alphabetical order. Define a term once, here, and use it consistently
+everywhere else. Where a term has a good external definition, link to it and
+cite the source.}
 
-\section{Operational and Environmental Requirements}
-\subsection{Expected Physical Environment}
-\lips
-\subsection{Wider Environment Requirements}
-\lips
-\subsection{Requirements for Interfacing with Adjacent Systems}
-\lips
-\subsection{Productization Requirements}
-\lips
-\subsection{Release Requirements}
-\lips
+\plt{Tip from the source template: define a \texttt{\textbackslash hypertarget}
+for each glossary entry and a macro such as \texttt{\textbackslash newcommand\{\textbackslash Term\}\{\textbackslash hyperlink\{glossary-term\}\{Term\}\}}
+so each use of the term in the body links back to its definition.}
 
-\section{Maintainability and Support Requirements}
-\subsection{Maintenance Requirements}
-\lips
-\subsection{Supportability Requirements}
-\lips
-\subsection{Adaptability Requirements}
-\lips
+\begin{itemize}
+    \item \textbf{Term} -- Definition.
+    \item \textbf{Acronym (Expansion)} -- Definition.
+\end{itemize}
 
-\section{Security Requirements}
-\subsection{Access Requirements}
-\lips
-\subsection{Integrity Requirements}
-\lips
-\subsection{Privacy Requirements}
-\lips
-\subsection{Audit Requirements}
-\lips
-\subsection{Immunity Requirements}
-\lips
+% ===========================================================================
+\pegschapter{G}{Goals}
 
-\section{Cultural Requirements}
-\subsection{Cultural Requirements}
-\lips
+\plt{The Goals chapter is written for decision makers. It explains why the
+project exists, in the language of the business or domain, not of the
+software. It should be readable on its own.}
 
-\section{Compliance Requirements}
-\subsection{Legal Requirements}
-\lips
-\subsection{Standards Compliance Requirements}
-\lips
+\subsection{Context and Overall Objective}\label{subsec:context-and-overall-objective}
+\plt{One or two paragraphs: the domain the system lives in, the problem it
+addresses, and the overall objective in a sentence a sponsor would recognize.}
 
-\section{Open Issues}
-\lips
+\subsection{Current Situation}\label{subsec:current-situation}
+\plt{How things are done today without the system, and what is wrong or
+missing. Reference existing tools or processes the system will replace or
+complement.}
 
-\section{Off-the-Shelf Solutions}
-\subsection{Ready-Made Products}
-\lips
-\subsection{Reusable Components}
-\lips
-\subsection{Products That Can Be Copied}
-\lips
+\subsection{Expected Benefits}\label{subsec:expected-benefits}
+\plt{The improvements the system will bring over the current situation, from
+the point of view of the stakeholders. Where possible, make each benefit
+measurable so it can be checked later.}
 
-\section{New Problems}
-\subsection{Effects on the Current Environment}
-\lips
-\subsection{Effects on the Installed Systems}
-\lips
-\subsection{Potential User Problems}
-\lips
-\subsection{Limitations in the Anticipated Implementation Environment That May
-Inhibit the New Product}
-\lips
-\subsection{Follow-Up Problems}
-\lips
+\begin{itemize}
+    \item \textbf{Benefit} -- Description.
+\end{itemize}
 
-\section{Tasks}
-\subsection{Project Planning}
-\lips
-\subsection{Planning of the Development Phases}
-\lips
+\subsection{Functionality Overview}\label{subsec:functionality-overview}
+\plt{A high-level list of what the system does. Each item should correspond to
+one or more components in S.1 and requirements in S.2, but stay at the level a
+non-technical reader can follow.}
 
-\section{Migration to the New Product}
-\subsection{Requirements for Migration to the New Product}
-\lips
-\subsection{Data That Has to be Modified or Translated for the New System}
-\lips
+\begin{itemize}
+    \item \textbf{Capability} -- Description.
+\end{itemize}
 
-\section{Costs}
-\lips
-\section{User Documentation and Training}
-\subsection{User Documentation Requirements}
-\lips
-\subsection{Training Requirements}
-\lips
+\subsection{High-Level Usage Scenarios}\label{subsec:high-level-usage-scenarios}
+\plt{The main ways users will interact with the system, as short narratives
+(two or three sentences each). Detailed use cases belong in S.6. An activity
+diagram can be included here if it helps.}
 
-\section{Waiting Room}
-\lips
+\begin{itemize}
+    \item \textbf{Scenario 1: Name} -- Description.
+\end{itemize}
 
-\section{Ideas for Solution}
-\lips
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\textwidth]{activity_diagram.png}
+%     \caption{Activity diagram showing the high-level usage scenarios.}
+%     \label{fig:activity-diagram}
+% \end{figure}
 
-\newpage{}
+\subsection{Limitations and Exclusions}\label{subsec:limitations-and-exclusions}
+\plt{What the system will not do. State exclusions explicitly so nobody later
+assumes they were simply forgotten.}
+
+\begin{itemize}
+    \item \textbf{Exclusion} -- Description and rationale.
+\end{itemize}
+
+\subsection{Stakeholders and Requirements Sources}\label{subsec:stakeholders-and-requirements-sources}
+\plt{Stakeholders: every person or group affected by the system, including
+clients, users, supervisors, and the wider community. Requirements sources:
+the documents, people, standards, and existing systems the requirements were
+elicited from.}
+
+\noindent\textbf{Stakeholders:}
+\begin{itemize}
+    \item \textbf{Stakeholder} -- Their interest in the system.
+\end{itemize}
+
+\noindent\textbf{Requirements Sources:}
+\begin{itemize}
+    \item \textbf{Source} -- What it contributed.
+\end{itemize}
+
+\subsection{User Profiles}\label{subsec:user-profiles}
+\plt{For each distinct group of hands-on users, describe their domain
+knowledge, goals, technical literacy, and which parts of the system matter most
+to them. These profiles justify usability and accessibility requirements later
+on.}
+
+\noindent\textbf{1. Profile Name}
+\begin{itemize}
+    \item \textbf{Domain Knowledge:}
+    \item \textbf{Goals:}
+    \item \textbf{Technical Literacy:}
+    \item \textbf{Rationale:} Which requirements exist for this user.
+\end{itemize}
+
+% ===========================================================================
+\pegschapter{E}{Environment}
+
+\plt{The Environment chapter describes the world the system operates in and
+cannot change: physical constraints, other systems, rules of the domain. These
+hold whether or not the system is built.}
+
+\subsection{Glossary}\label{subsec:glossary}
+The glossary has been moved to the front of the document (see the
+\hyperref[sec:glossary]{Glossary} and the Changes from Original SRS Meyer
+Template).
+
+\subsection{Environment Components}\label{subsec:environment-components}
+\plt{Elements of the environment that may affect or be affected by the system
+and the project, including other systems the system must interface with,
+hardware it runs on, and the people who operate it.}
+
+\begin{itemize}
+    \item \textbf{Component} -- Description and its relationship to the system.
+\end{itemize}
+
+\subsection{Constraints}\label{subsec:constraints}
+\plt{Obligations and limits imposed on the system by the environment:
+regulations, physical limits, resource limits, deadlines. These are not
+design choices; the system must live with them.}
+
+\begin{itemize}
+    \item \textbf{Constraint} -- Description.
+\end{itemize}
+
+\subsection{Assumptions}\label{subsec:assumptions}
+\plt{Properties of the environment that the system relies on but cannot
+enforce. Each assumption is a risk if it turns out false; cross-reference the
+Hazard Analysis where relevant.}
+
+\begin{itemize}
+    \item \textbf{Assumption} -- Description.
+\end{itemize}
+
+\subsection{Effects}\label{subsec:effects}
+\plt{The ways the system changes its environment once deployed: effects on
+users, on other systems, on resources.}
+
+\begin{itemize}
+    \item \textbf{Effect} -- Description.
+\end{itemize}
+
+\subsection{Invariants}\label{subsec:invariants}
+\plt{Properties of the environment that must remain true throughout the
+system's operation, and that the system must preserve.}
+
+\begin{itemize}
+    \item Invariant.
+\end{itemize}
+
+\subsection{Standards and Legal/Regulatory Factors}\label{subsec:standards}
+\plt{Coding, documentation, interface or safety standards the project will
+follow, and legal or regulatory factors such as licensing, intellectual
+property, and data privacy. Cite each standard.}
+
+\noindent\textbf{Standards:}
+\begin{itemize}
+    \item \textbf{Standard} -- What it governs and how it applies.
+\end{itemize}
+
+\noindent\textbf{Legal and Regulatory Factors:}
+\begin{itemize}
+    \item \textbf{Factor} -- Description.
+\end{itemize}
+
+\subsection*{Environmental Requirements}
+\addcontentsline{toc}{subsection}{Environmental Requirements}
+
+\plt{Requirements that follow directly from this chapter: installability on
+the target platforms, resource limits, invariant enforcement, standards
+compliance, legal compliance. Label each one so it can be referenced from S.7
+and S.8.}
+
+\begin{table}[H]
+    \centering
+    \caption{Environmental Requirements}
+    \label{tab:env-requirements}
+    \begin{tabular}{|l|p{11cm}|}
+    \hline
+    \textbf{Label} & \textbf{Requirement} \\
+    \hline
+    \label{NFR.E.1}NFR.E.1 & The system shall \ldots \\
+    \hline
+    \label{NFR.E.2}NFR.E.2 & The system shall \ldots \\
+    \hline
+    \end{tabular}
+\end{table}
+
+% ===========================================================================
+\pegschapter{S}{System}
+
+\plt{The System chapter is the technical core: what the system does, split
+by component, with each requirement labelled, prioritized and verifiable.}
+
+\subsection{Components}\label{subsec:components}
+\plt{The major parts of the system and how they interact. Include a component
+diagram. The components named here are reused as the subsections of S.2 and
+the groupings of S.7.}
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{component_diagram.png}
+%     \caption{Component diagram.}
+%     \label{fig:component-diagram}
+% \end{figure}
+
+\begin{itemize}
+    \item \textbf{Component} -- Responsibility.
+\end{itemize}
+
+\subsection{Functionality}\label{subsec:functionality}
+\plt{One subsubsection per component from S.1, each listing its functional
+requirements with labels FR.S.<component>.<n>. Each requirement is a single,
+testable ``shall'' statement. Non-functional requirements that cut across
+components go in the last subsubsection as NFR.S.<n>.}
+
+\subsubsection{Component Name}
+\textbf{Functional Requirements}
+\begin{itemize}
+    \item \label{FR.S.1.1}\textbf{FR.S.1.1} The system shall \ldots
+    \item \label{FR.S.1.2}\textbf{FR.S.1.2} The system shall \ldots
+\end{itemize}
+
+\subsubsection{Non-Functional Requirements}
+\begin{itemize}
+    \item \label{NFR.S.1}\textbf{NFR.S.1} \textbf{Quality attribute:} The system shall \ldots
+\end{itemize}
+
+\subsection{Interfaces}\label{subsec:interfaces}
+\plt{The interfaces the system exposes or consumes: user interfaces, APIs,
+protocols, file formats, hardware interfaces. For each, say who or what is on
+the other side.}
+
+\begin{itemize}
+    \item \textbf{Interface} -- Description.
+\end{itemize}
+
+\subsection{Normal Operation}\label{subsec:normal-operation}
+\plt{The expected flow of the system when everything goes right, from start-up
+to shut-down. Keep it to the main path; alternatives and failures go in S.5
+and S.6.}
+
+\begin{enumerate}
+    \item Step.
+\end{enumerate}
+
+\subsection{Undesired Event Handling}\label{subsec:undesired-event-handling}
+\plt{How the system responds to failures, invalid inputs, and unexpected
+conditions. Each entry should name the event and the required response.
+Cross-reference the Hazard Analysis.}
+
+\begin{itemize}
+    \item \textbf{Event} -- Required response.
+\end{itemize}
+
+\subsection{Detailed Usage Scenarios}\label{subsec:detailed-usage-scenarios}
+\plt{Full use cases for the scenarios introduced in G.5, one per scenario,
+in the structure below. The main success scenario should be numbered so
+extensions can reference its steps.}
+
+\noindent\textbf{Use Case Name:} Name
+
+\noindent\textbf{Primary Actor:} Actor
+
+\noindent\textbf{Stakeholders and Interests:}
+\begin{itemize}
+    \item Stakeholder: interest.
+\end{itemize}
+
+\noindent\textbf{Preconditions:}
+\begin{itemize}
+    \item Precondition.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Success Guarantees):}
+\begin{itemize}
+    \item Postcondition.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Failure Guarantees):}
+\begin{itemize}
+    \item Postcondition.
+\end{itemize}
+
+\noindent\textbf{Main Success Scenario (Basic Flow):}
+\begin{enumerate}
+    \item Step.
+\end{enumerate}
+
+\noindent\textbf{Extensions:}
+\begin{itemize}
+    \item \textbf{Na.} Alternative or failure at step N, and how it is handled.
+\end{itemize}
+
+\noindent\textbf{Justification:} Why this scenario matters.
+
+\subsection{Prioritization}\label{subsec:prioritization}
+\plt{Every requirement from S.2 and the Environmental Requirements table,
+with a MoSCoW priority and the reason for it. Group the tables by component.
+The Date column records when the priority was last decided.}
+
+\noindent Priorities follow MoSCoW: \textbf{M} must have, \textbf{S} should
+have, \textbf{C} could have, \textbf{W} won't have (this release).
+
+\subsubsection*{Component Name}
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{3.5cm}|c|p{5cm}|l|}
+\hline
+\textbf{ID} & \textbf{Requirement Name} & \textbf{Priority} & \textbf{Reasoning} & \textbf{Date} \\
+\hline
+\hyperref[FR.S.1.1]{FR.S.1.1} & Name & M & Reasoning & YYYY-MM-DD \\
+\hline
+\hyperref[FR.S.1.2]{FR.S.1.2} & Name & S & Reasoning & YYYY-MM-DD \\
+\hline
+\end{tabular}
+\caption{Prioritization of Component Name requirements}
+\label{tab:prioritization-component}
+\end{table}
+
+\subsection{Verification and Acceptance Criteria}\label{subsec:verification-and-acceptance-criteria}
+\plt{How each class of requirement will be shown to be satisfied: unit and
+integration tests, measurements, user studies, inspections. Make the criteria
+concrete enough that the V\&V Plan can be derived from them. Every requirement
+in S.2 should map to at least one criterion here.}
+
+\noindent\textbf{Validation Overview:}
+
+\noindent\textbf{Verification Approach by Requirement Class:}
+\begin{itemize}
+    \item \textbf{Class of requirements} -- How it will be verified and what counts as acceptance.
+\end{itemize}
+
+\subsection{Formalizations}\label{subsec:formalizations}
+\plt{Mathematical or formal specification of the parts of the system that
+benefit from precision: state models, invariants, algorithms, data formats.
+Z notation is available through the \texttt{zed-csp} package. If nothing in
+the system warrants formalization, say so and why.}
+
+% ===========================================================================
+\pegschapter{P}{Project}
+
+\plt{The Project chapter covers how the system will be built: people,
+imposed choices, schedule, deliverables, risks, and how requirements will be
+managed over the project's life.}
+
+\subsection{Roles and Personnel}\label{subsec:roles}
+\plt{Each team member and their role, plus the supervisor and TA. Keep this
+consistent with the Development Plan.}
+
+\begin{itemize}
+    \item \textbf{Role (Name)} -- Responsibilities.
+\end{itemize}
+
+\subsection{Imposed Technical Choices}\label{subsec:technical-choices}
+\plt{Technologies that are fixed before design begins and why: languages,
+frameworks, hardware, platforms mandated by the client, supervisor, or
+environment. Choices the team is still free to make do not belong here.}
+
+\begin{itemize}
+    \item \textbf{Choice} -- What is imposed and by whom.
+\end{itemize}
+
+\subsection{Schedule and Milestones}\label{subsec:schedule}
+\plt{The major milestones and their dates. Course deliverables are a starting
+point; add project-specific milestones such as prototypes or integration
+points.}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{|l|l|}
+  \hline
+  \textbf{Milestone} & \textbf{Due Date} \\ \hline
+  Milestone & Date \\ \hline
+  \end{tabular}
+  \caption{Project Milestones and Due Dates}
+  \label{tab:project-milestones}
+\end{table}
+
+\subsection{Tasks and Deliverables}\label{subsec:tasks}
+\plt{The work breakdown: each task, what it produces, and which milestone it
+feeds. Tasks should be small enough to assign to one or two people.}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{5.5cm}|p{3cm}|p{2.5cm}|}
+\hline
+\textbf{Task} & \textbf{Description / Steps} & \textbf{Deliverable} & \textbf{Due Date} \\ \hline
+Task & Description & Deliverable & Date \\ \hline
+\end{tabular}
+\caption{Tasks and Deliverables}
+\label{tab:tasks-deliverables}
+\end{table}
+
+\subsection{Required Technology Elements}\label{subsec:required-tech}
+\plt{Everything the project needs to obtain or build before the system can be
+delivered: libraries, hardware, datasets, services, licences, compute. Note
+anything not yet secured.}
+
+\begin{itemize}
+    \item \textbf{Element} -- Purpose and status.
+\end{itemize}
+
+\subsection{Risk and Mitigation Analysis}\label{subsec:risk}
+\plt{Project risks (schedule, technical, people, external dependencies), each
+with its likelihood, impact, and mitigation. System hazards belong in the
+Hazard Analysis, not here.}
+
+\begin{itemize}
+    \item \textbf{Risk: Name}
+    \begin{itemize}
+        \item Description:
+        \item Mitigation:
+    \end{itemize}
+\end{itemize}
+
+\subsection{Requirements Process and Report}\label{subsec:requirements-process}
+\plt{How requirements were elicited and how they will be maintained: who was
+consulted, through which channels, how changes are tracked, and how this
+document will be kept in sync with the Hazard Analysis, V\&V Plan and design.}
+
+\begin{itemize}
+    \item \textbf{Elicitation} --
+    \item \textbf{Communication} --
+    \item \textbf{Change Tracking} --
+    \item \textbf{Process Updates} --
+\end{itemize}
+
+% ===========================================================================
+\newpage
+\tocsection{Safety and Security Requirements}
+\label{sec:safety-security}
+
+\plt{Port the requirements from the Safety and Security Requirements section
+of the Hazard Analysis so this document is the single list of requirements.
+Keep the labels identical in both documents.}
+
+\subsection*{Functional Safety Requirements}
+\begin{itemize}
+    \item \label{FR.Sa.1}\textbf{FR.Sa.1} The system shall \ldots
+\end{itemize}
+
+\subsection*{Non-Functional Safety Requirements}
+\begin{itemize}
+    \item \label{NFR.Sa.1}\textbf{NFR.Sa.1} The system shall \ldots
+\end{itemize}
+
+% ===========================================================================
+\newpage
+\tocsection{Requirement Dependencies}
+\label{sec:requirement-dependencies}
+
+\plt{A traceability diagram or matrix showing which requirements depend on
+which. Use the landscape environment below for a wide figure.}
+
+% \begin{landscape}
+%     \centering
+%     \includegraphics[width=1.5\textheight]{requirement_dependency_diagram.png}
+%     \captionof{figure}{Requirement dependency diagram.}
+%     \label{fig:requirement-dependencies}
+% \end{landscape}
+
+% ===========================================================================
+\newpage
+\plt{Cite sources with \texttt{\textbackslash citep\{key\}} or
+\texttt{\textbackslash citet\{key\}}; entries live in
+\texttt{refs/References.bib}. The References section appears once at least
+one source is cited.}
+
+\bibliographystyle{plainnat}
+\bibliography{../../refs/References}
+
+% ===========================================================================
+% Appendices use ordinary section numbering again.
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\theHsubsection}{\thesection.\arabic{subsection}}
+\newpage
 \section{Appendix --- Generative AI Use Disclosure}
 
 \wss{ChatGPT (version 5) was used to brainstorm ideas for the template for this disclose section.}
@@ -278,7 +633,7 @@ inconsistencies.}
 
 \wss{For each of the uses, identify which parts of the document were affected.}
 
-\wss{You do not need to report every interaction, but you should disclose the 
+\wss{You do not need to report every interaction, but you should disclose the
 uses that materially contributed to your work}
 
 \subsection{Verification of AI-Generated Content}
@@ -294,7 +649,7 @@ consistency, and appropriateness of the submitted document, regardless of
 whether material was generated by a human or an AI system.}
 \end{itemize}}
 
-\newpage{}
+\newpage
 
 \section{Appendix --- Reflection}
 
