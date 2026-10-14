@@ -66,7 +66,7 @@ hazards.}
 
 \subsection{Coordinator}
 \label{subsec:coordinator}
-This component exists primarily on the leader device, and has variety of responsibilities:
+This component exists on all nodes, but the following responsibilities are only run on the leader node:
 \begin{itemize}
 	\item Providing an OpenAI-API compatible API to the user for use with tools like
 		\href{https://opencode.ai/}{OpenCode}.
@@ -76,6 +76,8 @@ This component exists primarily on the leader device, and has variety of respons
 		in the case of node failure, removal, or addition.
 	\item Measuring node connection performance.
 \end{itemize}
+On a follower node, it is primarily responsible for managing the inference engine
+on its device, following the instructions of the leader node.
 
 \subsection{Model Partitioner}
 This component determines how to partition the model among the participating devices. It
@@ -89,7 +91,7 @@ execution of the given model partition for each device. It will call into
 \href{https://github.com/ggml-org/ggml}{ggml} using the Rust-to-C FFI to control the execution of a
 device's model partition.
 
-\subsection{Inter-device communication}
+\subsection{Tensor I/O}
 This component handles the compressing, sending, receiving, and decompressing of tensors between devices.
 It will leverage \href{https://grpc.io/}{gRPC} for high-performance communication, with the potential
 to use a custom solution should \href{https://grpc.io/}{gRPC} fail to meet our requirements in practice.
