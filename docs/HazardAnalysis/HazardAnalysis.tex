@@ -64,18 +64,53 @@ hazards.}
 
 \section{System Boundaries and Components}
 
-\wss{Dividing the system into components will help you brainstorm the hazards.
-You shouldn't do a full design of the components, just get a feel for the major
-ones.  For projects that involve hardware, the components will typically include
-each individual piece of hardware.  If your software will have a database, or an
-important library, these are also potential components.}
+\subsection{Coordinator}
+\label{subsec:coordinator}
+This component exists primarily on the leader device, and has variety of responsibilities:
+\begin{itemize}
+	\item Providing an OpenAI-API compatible API to the user for use with tools like
+		\href{https://opencode.ai/}{OpenCode}.
+	\item Tracking cluster health, and detecting node failures.
+	\item Notifying nodes of partitioning changes.
+	\item Rebuilding the cluster and saving in-progress requests
+		in the case of node failure, removal, or addition.
+	\item Measuring node connection performance.
+\end{itemize}
+
+\subsection{Model Partitioner}
+This component determines how to partition the model among the participating devices. It
+decides at which points to cut the graph, how large each partition is, and which device gets
+each partition. This component is integral to ensuring that each device is assigned an appropriate
+partition given the device's computational and networking performance.
+
+\subsection{Inference Engine}
+This component is the high-performance inference engine running on each device. It will handle
+execution of the given model partition for each device. It will call into
+\href{https://github.com/ggml-org/ggml}{ggml} using the Rust-to-C FFI to control the execution of a
+device's model partition.
+
+\subsection{Inter-device communication}
+This component handles the compressing, sending, receiving, and decompressing of tensors between devices.
+It will leverage \href{https://grpc.io/}{gRPC} for high-performance communication, with the potential
+to use a custom solution should \href{https://grpc.io/}{gRPC} fail to meet our requirements in practice.
+
+\subsection{Boundaries}
+The system boundaries for Lake primarily consist of:
+\begin{itemize}
+	\item The \hyperref[subsec:coordinator]{Coordinator's} OpenAI-API compatible API.
+	\item Model files (GGUF) loaded from disk.
+	\item Networking components between devices (Thunderbolt, Ethernet, WiFi, routers). 
+	\item The OS and GPU resources on each individual device.
+\end{itemize}
 
 \section{Critical Assumptions}
 
-\wss{These assumptions that are made about the software or system.  You should
-minimize the number of assumptions that remove potential hazards.  For instance,
-you could assume a part will never fail, but it is generally better to include
-this potential failure mode.}
+We assume:
+\begin{itemize}
+	\item The model file (GGUF) provided to Lake is already a functional LLM before partitioning.
+	\item User requests are only made through the API on the leader device.
+	\item Only one model will be run by the pool at a time.
+\end{itemize}
 
 \section{Failure Mode and Effect Analysis}
 
