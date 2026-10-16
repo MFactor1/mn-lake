@@ -112,6 +112,7 @@ We assume:
 	\item The model file (GGUF) provided to Lake is already a functional LLM before partitioning.
 	\item User requests are only made through the API on the leader device.
 	\item Only one model will be run by the pool at a time.
+	\item The local area network connecting the devices is private, and trusted by the user.
 \end{itemize}
 
 \section{Failure Mode and Effect Analysis}
