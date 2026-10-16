@@ -125,6 +125,10 @@ Added References & Meyer's template has no references section. \\
 \hline
 Added Appendices (Generative AI Use Disclosure, Reflection) & Required by the course. \\
 \hline
+Added S.10 Likely changes to requirements & Required by the SRS rubric \\
+\hline
+Added S.11 Unlikely changes to requirements & Required by the SRS rubric \\
+\hline
 \end{tabularx}
 \end{table}
 
@@ -477,6 +481,40 @@ in S.2 should map to at least one criterion here.}
 benefit from precision: state models, invariants, algorithms, data formats.
 Z notation is available through the \texttt{zed-csp} package. If nothing in
 the system warrants formalization, say so and why.}
+
+\subsection{Likely Changes to Requirements}\label{subsec:likely-changes-to-requirements}
+\begin{itemize}
+	\item \label{LC.1}\textbf{LC.1} A Lake cluster cannot recover from a failing leader node (see \hyperref[FR.S.1.25]{FR.S.1.25}).
+		In the future, the ability to recover from a failing leader node may be added.
+	\item \label{LC.2}\textbf{LC.2} Lake only supports desktop operating systems (Windows, macOS, Linux) (see \hyperref[NFR.S.13]{NFR.S.13}).
+		Support for mobile devices (iOS, Android) may be added once other goals and requirements have been met.
+	\item \label{LC.3}\textbf{LC.3} Lake assumes the local area network being used to connect the devices is private
+		and trusted (See HazardAnalysis Section 4 - Critical Assumptions). Lake's may be extended with additional
+		security hardening to allow clusters to run on public or untrusted networks.
+	\item \label{LC.4}\textbf{LC.4} Lake requires that each device manually confirm joining a cluster
+		(see \hyperref[FR.S.1.17]{FR.S.1.17} and \hyperref[FR.S.1.21]{FR.S.1.21}). In the future,
+		a trust mechanism may be introduced, which would allow devices to automatically join clusters created by trusted
+		devices without requiring confirmation.
+	\item \label{LC.5}\textbf{LC.5} Requirement thresholds and intervals will likely change, as real-world usage
+		gives better estimates for reasonable threshold values.
+	\item \label{LC.6}\textbf{LC.6} It is likely that future versions of Lake will support a headless mode
+		where all UI interactions are performed through a command line interface. This would be useful for users wishing to
+		use headless servers as nodes.
+\end{itemize}
+
+\subsection{Unlikely Changes to Requirements}\label{subsec:unlikely-changes-to-requirements}
+\begin{itemize}
+	\item \label{UC.1}\textbf{UC.1} Model training and fine-tuning support is unlikely to be added to Lake. Lake is
+		primarily an inference framework, so the addition of training would be out of scope for such a project.
+	\item \label{UC.2}\textbf{UC.2} Additional input model formats aside from GGUF (TODO: glossary) are unlikely to
+		be added, as GGUF is one of the most common standards for LLMs (TODO: glossary). Additionally, models
+		in other formats can be converted to GGUF so there is little reason for Lake to support them directly.
+	\item \label{UC.3}\textbf{UC.3} A primary goal of Lake is privacy (see \hyperref[NFR.S.11]{NFR.S.11}),
+		so modifications that would compromise privacy like incorporating cloud-based services are unlikely.
+	\item \label{UC.4}\textbf{UC.4} Even though one of Lake's goals is to run larger models, integrating quantization
+		tools into Lake is unlikely. Lake's scope is focused on distributed inference, and quantization tools
+		would better fit in the scope of an independent project.
+\end{itemize}
 
 % ===========================================================================
 \pegschapter{P}{Project}
