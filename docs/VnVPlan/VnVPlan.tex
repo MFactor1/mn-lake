@@ -166,51 +166,76 @@ This document ... \wss{provide an introductory blurb and roadmap of the
 
 \section{General Information}
 
+This plan covers the core release of \progname{} as scoped in the SRS.
+
 \subsection{Summary}
 
-\wss{Say what software is being tested.  Give its name and a brief overview of
-  its general functions.}
+The software under test is \progname{}, which runs one large language model
+(LLM) across several consumer devices on a local network. \progname{} splits
+the model by layer and gives each device a consecutive range of layers. The
+operator forms a Lake network from the Lake Client, loads a
+GGUF model, and sends prompts through an OpenAI-compatible API. When a node
+joins or leaves, \progname{} reassigns the layers and keeps serving requests.
+
+All five components are in scope: the Coordinator, the Model Partitioner, the
+Inference Engine, Tensor I/O, and the Lake Client.
 
 \subsection{Objectives}
 
-\wss{State what is intended to be accomplished.  The objective will be around
-  the qualities that are most important for your project.  You might have
-  something like: ``build confidence in the software correctness,''
-  ``demonstrate adequate usability.'' etc.  You won't list all of the qualities,
-  just those that are most important.}
+The qualities we most need confidence in are output correctness, privacy,
+reliability when devices come and go, and performance.
 
-\wss{You should also list the objectives that are out of scope.  You don't have 
-the resources to do everything, so what will you be leaving out.  For instance, 
-if you are not going to verify the quality of usability, state this.  It is also 
-worthwhile to justify why the objectives are left out.}
+Splitting a model must not change what it produces. The split model's
+benchmark scores must stay within \textit{BENCH\_RATIO} of the unsplit
+model's. Related to NFR.S.6.
 
-\wss{The objectives are important because they highlight that you are aware of 
-limitations in your resources for verification and validation.  You can't do everything, 
-so what are you going to prioritize?  As an example, if your system depends on an 
-external library, you can explicitly state that you will assume that external library 
-has already been verified by its implementation team.}
+No node may keep request data after a request finishes, and nothing from a request may
+leave the Lake network except the response to the client. Related to
+NFR.S.10, NFR.S.11, and SR5-2.
+
+For reliability, \progname{} must keep serving requests when a node fails,
+leaves, or joins, and must refuse a model that would run a node out of memory.
+Related to FR.S.1.10 to FR.S.1.12, SR1-3, and SR2-1.
+
+For performance, a Lake network must run a model too large for its biggest
+node, and the number of requests it serves at once within
+\textit{MAX\_DEGRADATION} must grow with the number of nodes. Single-request
+speed is measured but has no pass threshold, since a split model is not
+expected to beat one device on a model that already fits. Related to NFR.S.4
+and NFR.S.5.
+
+Usability is checked with the survey in the appendix rather than a formal
+study. For platforms, we test the operating system, CPU, and GPU combinations
+the team owns and report the rest as untested in the V\&V Report.
+
+We test how \progname{} uses ggml and llama.cpp, not the libraries
+themselves. The content a correctly running model generates is also out of
+scope. The stretch goals (encryption,
+authentication, wireless links, and smartphones) are not tested this year, and
+neither are attacks from inside the local network.
 
 \subsection{Custom Documents}
 
-\wss{Summarize the CDs (Custom Documents) that were tackled by this project.  CDs 
-can include usability testing, code walkthroughs, user documentation, formal
-proof, GenderMag personas, Design Thinking, etc.  CDs should have already
-been approved by the course instructor as included in your problem statement.
-You can use a pull request to update your CDs (in TeamComposition.csv or
-Repos.csv) if your plan changes as a result of the VnV planning exercise.}
+Our custom documents are a Design Thinking Report in the fall and a Performance
+Report in the winter \citep{ProblemStatement}. Software validation checks the
+system against the user needs recorded in the Design Thinking Report. The
+Performance Report measures model size, token throughput, latency, and
+reassignment time beyond the SRS targets, starting from the results of the
+performance tests in this plan.
 
 \subsection{Relevant Documentation}
 
-\wss{Reference relevant documentation.  This will definitely include your SRS
-  and your other project documents (design documents, like MG, MIS, etc).  You
-  can include these even before they are written, since by the time the project
-  is done, they will be written.  You can create BibTeX entries for your
-  documents and within those entries include a hyperlink to the documents.}
+Every system test traces to a requirement in the SRS \citep{SRS}, which also
+defines the symbolic constants used here. The Hazard Analysis
+\citep{HazardAnalysis} produced the safety requirements SR0-1 to SR5-2, and
+each has at least one test. Five of its 12 failure modes are in communication
+between nodes, so most of our fault-injection tests target that
+area.
 
-\citet{SRS}
-
-\wss{Don't just list the other documents.  You should explain why they are relevant and 
-how they relate to your VnV efforts.}
+The Development Plan \citep{DevelopmentPlan} sets the linters, test frameworks,
+and continuous integration pipeline our automated tests use. Unit tests will be written against the
+Module Guide \citep{MG} and Module Interface Specification \citep{MIS} once
+they exist.
 
 \section{Plan}
 
