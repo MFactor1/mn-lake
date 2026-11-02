@@ -73,11 +73,15 @@ in.}
 \section{Symbols, Abbreviations, and Acronyms}
 
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{l p{10cm}} 
-  \toprule		
-  \textbf{Symbol/Acronym} & \textbf{Description}\\
-  \midrule 
-  SOLID\label{SOLID} & Acronym for specifying design principles. Stands for Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion. \\
+\begin{longtable}{@{}p{0.3\textwidth} p{\dimexpr0.7\textwidth-2\tabcolsep\relax}@{}}
+  \toprule
+  \textbf{Term} & \textbf{Description}\\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Term} & \textbf{Description}\\
+  \midrule
+  \endhead
   \bottomrule
   \endfoot
   \bottomrule
@@ -138,6 +142,7 @@ in.}
   \glsentry{rpc}{RPC} & Remote procedure call. Calling a function on another machine as if it were local.\\
   \glsentry{rtt}{RTT} & Round-trip time. The time for a message to reach another node and for the reply to come back.\\
   \glsentry{session}{Session} & A period of interaction with Lake in which one or more inference requests are served. For the operator, it runs from forming a Lake network to shutting it down. For an inference user, it is one conversation whose context is kept between prompts.\\
+  SOLID\label{SOLID} & Acronym for specifying design principles. Stands for Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion. \\
   \glsentry{srs}{SRS} & Software Requirements Specification. This document.\\
   \glsentry{streaming}{Streaming} & Returning a response token by token as it is generated.\\
   \glsentry{ta}{TA} & Teaching assistant. The course staff member who advises the team and assesses its deliverables.\\
@@ -338,56 +343,65 @@ In order to verify the quality of the team's verification and validation plan, t
 
 \subsection{Implementation Verification}
 \label{sec:ImpVer}
+The implementation will utilize a combination of code review, tests, benchmarks, and issue tracking methods to verify correctness and performance in an organized and auditable manner.
+\begin{itemize}
+  \item \textbf{Code review:}
+  GitHub pull requests will be created for code review following the Development Plan's process of approving code changes. At least two reviewers will check for correctness, error handling, and adequate tests for the code changes. A max of 400 lines added per pull request constraint is added to ensure each pull request is auditable for reviewers, with larger features split into several pull requests.
 
-\wss{You should at least point to the tests listed in this document and the unit
-  testing plan.}
+  \item \textbf{Unit and integration tests:}
+  Unit tests will be used to ensure correctness in areas such as model layer allocation constraints, lifecycle transitions of node health, and message format validation to ensure compatibility with interfaces (e.g., the OpenAI API spec). Integration tests will be used to validate runtime behavior of running multiple node processes on a single machine with a small model to ensure functional end to end behavior. Both checks will run in the CI using GitHub runners, configured such that the relevant tests respective to the code changes are run.
 
-\wss{In this section you would also give any details of any plans for static
-  verification of the implementation.  Potential techniques include code
-  walkthroughs, code inspection, static analyzers, etc.}
+  \item \textbf{Fault Handling:}
+  Tests will introduce faults in lifecycle and data states to inject stale health data, unavailable nodes, corrupted or incomplete tensor messages, and communication delays. The results will be checked against the defined safety requirements in bounded recovery, explicit failures, and filtration of sensitive data in diagnostic logs.
 
-\wss{The final class presentation in CAS 741 could be used as a code
-walkthrough.  There is also a possibility of using the final presentation (in
-CAS741) for a partial usability survey.}
+  \item \textbf{System Testing:}
+  Tests for Lake's end-to-end behavior that may require multiple devices, various supported GPU backends and operating systems, and varying degrees of system capabilities will be run on team hardware before major releases or demonstrations. System test coverage will identify the operating system, CPU architecture, GPU backends, and system capability metrics (RAM/VRAM, CPU/GPU performance). Combinations of system configurations and capabilities that are are not tested will be reported as untested in the V\&V report. Each recorded result will also identify the commit of the current code version, the model as well its quantization, node configuration, and test inputs for repeatability.
+
+  \item \textbf{Performance Verification:}
+  Performance metrics such as Lake's capacity for model size, concurrent request throughput, and output quality will be used to verify that optimizations result in quantitative performance gain, and that changes do not regress performance, as specified in Section 4.2.
+
+  \item \textbf{Defect Tracking:}
+  Failed CI checks will block pull requests from being merged. If review findings are too large in scope to be addressed in the pull request, they will instead be filed as GitHub issues. Regression tests will be added when a failure is identified to prevent it from recurring.
+\end{itemize}
 
 \subsection{Automated Testing and Verification Tools}
 \label{sec:AutoTestVer}
+The following testing and verification tools will be used in accordance with the technologies specified in the Development Plan.
+\begin{itemize}
+  \item \textbf{Testing frameworks:}
+  \texttt{pytest}~\citep{Pytest} will be used for Python components, \texttt{cargo test}~\citep{CargoTest} for Rust components, and \texttt{Vitest}~\citep{Vitest} for TypeScript components. Tests will cover behavior around the components of the coordinator, model partitioner, inference engine, Tensor I/O, and the Lake client.
 
-\wss{What tools are you using for automated testing.  Likely a unit testing
-  framework and maybe a profiling tool, like ValGrind.  Other possible tools
-  include a static analyzer, make, continuous integration tools, test coverage
-  tools, etc.  Explain your plans for summarizing code coverage metrics.
-  Linters are another important class of tools.  For the programming language
-  you select, you should look at the available linters.  There may also be tools
-  that verify that coding standards have been respected, like flake9 for
-  Python.}
+  \item \textbf{Static checks:}
+  \texttt{Ruff}~\citep{Ruff} will be used for Python code, \texttt{Clippy}~\citep{Clippy} and \texttt{rustfmt}~\citep{Rustfmt} will be used for Rust code, and \texttt{ESLint}~\citep{ESLint} and \texttt{Prettier}~\citep{Prettier} will be used for TypeScript code. These checks will be run on commit hooks and pull request CI.
 
-\wss{If you have already done this in the development plan, you can point to
-that document.}
+  \item \textbf{Continuous integration:}
+  GitHub Actions~\citep{GitHubActions} will be used to run checks and automated tests on Linux, Windows, and macOS runners. To minimize CI minutes, applicable tests will use lightweight models across local processes. Tests requiring specific hardware that GitHub runners do not provide will instead be run on team hardware outside of the CI.
 
-\wss{The details of this section will likely evolve as you get closer to the
-  implementation.}
+  \item \textbf{Code coverage:}
+  \texttt{pytest-cov}~\citep{PytestCov} will be used for Python code coverage, and \texttt{cargo-llvm-cov}~\citep{CargoLlvmCov} will be used for Rust code coverage. Code coverage reports will be generated that summarize which components and code are not exercised by a test suite.
+
+  \item \textbf{Memory and network checks:}
+  \texttt{AddressSanitizer}~\citep{AddressSanitizer} will be used for verifying unsafe \texttt{ggml}~\citep{Ggml} integrations. \texttt{tc netem}~\citep{TcNetem} on Linux will be used for packet loss and delays as specified in Section 4.2.
+
+  \item \textbf{Performance comparisons:}
+  Scripts will be used to measure concurrent request throughput, as well as compare model accuracy scores against the same model served by \texttt{llama-server}~\citep{LlamaCpp} as defined in Section 4.2.
+\end{itemize}
 
 \subsection{Software Validation}
 \label{sec:SoftVal}
+Software validation assesses if Lake meets the needs described by the SRS goals, stakeholder interview, and user profiles. In addition to checking these requirements, the team will gather feedback on whether the workflow and user experience are useful and intuitive.
+\begin{itemize}
+  \item \textbf{Task-based user sessions:}
+  Participants who have not used Lake, such as other students outside of the capstone team, will complete tasks to set up and utilize the Lake network as specified in Section 6.2. These sessions will utilize the participant count and time limits specified in Section 6.1. With the data recorded from these sessions, the team will gauge whether users can correctly and easily configure Lake and understand how participating devices work, as well as determine the throughput and bottlenecks of the system.
 
-\wss{If there is any external data that can be used for validation, you should
-  point to it here.  If there are no plans for validation, you should state that
-  here.}
+  \item \textbf{Demonstrations of benefits:}
+  During the PoC and revision 0 demonstration, the team will demonstrate the functionality of Lake at its current stage to collect feedback on its usefulness and benefits. Demonstrations will show a client that is connected to the Lake API to access a model via a pooled device network, and measurements across concurrent requests, model capacity, and output quality will be made, corresponding to the tests in Section 4. Participants of the Lake network at this stage can also comment on if the response times and token throughput of the model are acceptable for their use case.
 
-\wss{You might want to use review sessions with the stakeholder to check that
-the requirements document captures the right requirements.  Maybe task based
-inspection?}
+  \item \textbf{Stakeholder interview:}
+  Subject to availability of the previously interviewed AI developer from the SRS, the team will seek follow-up feedback. The follow-up will involve the ergonomics of integrating Lake into the company's workflow, the implementation of the security and telemetry requirements, and any limitations that would prevent operation at their company.
 
-\wss{For those capstone teams with an external supervisor, the Rev 0 demo should 
-be used as an opportunity to validate the requirements.  You should plan on 
-demonstrating your project to your supervisor shortly after the scheduled Rev 0 demo.  
-The feedback from your supervisor will be very useful for improving your project.}
-
-\wss{For teams without an external supervisor, user testing can serve the same purpose 
-as a Rev 0 demo for the supervisor.}
-
-\wss{This section might reference back to the SRS verification section.}
+\end{itemize}
+Feedback from the software validation will be recorded as GitHub issues and used to iterate on the implementation or revise requirements.
 
 \section{System Tests}
 
