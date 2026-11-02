@@ -73,11 +73,15 @@ in.}
 \section{Symbols, Abbreviations, and Acronyms}
 
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{l p{10cm}} 
-  \toprule		
-  \textbf{Symbol/Acronym} & \textbf{Description}\\
-  \midrule 
-  SOLID\label{SOLID} & Acronym for specifying design principles. Stands for Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion. \\
+\begin{longtable}{@{}p{0.3\textwidth} p{\dimexpr0.7\textwidth-2\tabcolsep\relax}@{}}
+  \toprule
+  \textbf{Term} & \textbf{Description}\\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Term} & \textbf{Description}\\
+  \midrule
+  \endhead
   \bottomrule
   \endfoot
   \bottomrule
@@ -138,6 +142,7 @@ in.}
   \glsentry{rpc}{RPC} & Remote procedure call. Calling a function on another machine as if it were local.\\
   \glsentry{rtt}{RTT} & Round-trip time. The time for a message to reach another node and for the reply to come back.\\
   \glsentry{session}{Session} & A period of interaction with Lake in which one or more inference requests are served. For the operator, it runs from forming a Lake network to shutting it down. For an inference user, it is one conversation whose context is kept between prompts.\\
+  SOLID\label{SOLID} & Acronym for specifying design principles. Stands for Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion. \\
   \glsentry{srs}{SRS} & Software Requirements Specification. This document.\\
   \glsentry{streaming}{Streaming} & Returning a response token by token as it is generated.\\
   \glsentry{ta}{TA} & Teaching assistant. The course staff member who advises the team and assesses its deliverables.\\
