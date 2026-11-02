@@ -11,9 +11,16 @@
     urlcolor=blue
 }
 \usepackage[round]{natbib}
+\usepackage{longtable}
+\usepackage{booktabs}
 
 \input{../Comments.text}
 \input{../Common.text}
+
+% Zero-size, empty anchor placed before the term, so it can't shift the text
+\providecommand{\glsentry}[2]{}
+\renewcommand{\glsentry}[2]{\raisebox{0pt}[0pt][0pt]{\hypertarget{gls:#1}{}}#2}
+\providecommand{\glink}[2]{\hyperlink{gls:#1}{#2}}
 
 \begin{document}
 
@@ -65,18 +72,90 @@ in.}
 \section{Symbols, Abbreviations, and Acronyms}
 
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{l l} 
-  \toprule		
-  \textbf{symbol} & \textbf{description}\\
-  \midrule 
-  T & Test\\
+\begin{longtable}{@{}p{0.3\textwidth} p{\dimexpr0.7\textwidth-2\tabcolsep\relax}@{}}
+  \toprule
+  \textbf{Term} & \textbf{Description}\\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Term} & \textbf{Description}\\
+  \midrule
+  \endhead
   \bottomrule
-\end{tabular}\\
+  \endfoot
+  \bottomrule
+  \endlastfoot
 
-\wss{symbols, abbreviations, or acronyms --- you can simply reference the SRS
-  \citep{SRS} tables, if appropriate}
-
-\wss{Remove this section if it isn't needed}
+  \glsentry{activation}{Activation} & An intermediate value that a model layer computes and passes to the next layer.\\
+  \glsentry{ai}{AI} & Artificial intelligence. Software that does tasks that normally need human judgement. In this document it always means an LLM.\\
+  \glsentry{api}{API} & Application programming interface. A set of requests one program can make of another. Lake's API is the OpenAI-compatible API on the leader node.\\
+  \glsentry{arm}{ARM} & One of the two CPU architectures Lake supports, used by Apple silicon and most mobile devices.\\
+  \glsentry{backpressure}{Backpressure} & A signal that a node is receiving tensors faster than it can process them, so the upstream node should slow down.\\
+  \glsentry{bottleneck}{Bottleneck} & The node or network connection that takes the longest per token and limits the throughput of the whole Lake network.\\
+  \glsentry{contextwindow}{Context window} & The maximum number of tokens, prompt and response together, that a model can handle in one request.\\
+  \glsentry{ci}{Continuous integration} & Building and testing the code automatically on every push to the repository.\\
+  \glsentry{coordinator}{Coordinator} & The Lake component that forms and monitors the Lake network, serves the API on the leader node, and manages the Inference Engine on each node.\\
+  \glsentry{cpu}{CPU} & Central processing unit. A device's general-purpose processor.\\
+  \glsentry{deviceowner}{Device owner} & The person whose computer joins a Lake network. They must consent before their device takes part.\\
+  \glsentry{dynamicallocation}{Dynamic allocation} & Moving model layers between nodes while the Lake network is running, when a node joins, leaves, or fails.\\
+  \glsentry{ffi}{FFI} & Foreign function interface. An interface that lets code in one language call code in another.\\
+  \glsentry{flops}{FLOP/s} & Floating-point operations per second. The number of floating-point operations a processor performs per second, used to measure compute performance.\\
+  \glsentry{follower}{Follower node} & Any node in a Lake network other than the leader node.\\
+  \glsentry{gguf}{GGUF} & The file format used by llama.cpp and ggml to store a model's weights, tokeniser, and metadata. Lake only accepts GGUF models.\\
+  \glsentry{gpl}{GPL} & GNU General Public License. The free software licence, version 3.0, that Lake is released under.\\
+  \glsentry{gpu}{GPU} & Graphics processing unit. A device's parallel processor, which does the arithmetic of inference.\\
+  \glsentry{greedy}{Greedy decoding} & Always choosing the most probable next token, so the same prompt gives the same output every time.\\
+  \glsentry{grpc}{gRPC} & A remote procedure call framework from Google. Tensor I/O uses it to send tensors between nodes.\\
+  \glsentry{http}{HTTP} & Hypertext Transfer Protocol. The request and response protocol of the web.\\
+  \glsentry{inference}{Inference} & Using a model to generate text from a prompt.\\
+  \glsentry{inferenceengine}{Inference Engine} & The Lake component on each node that loads the node's partition and runs it to generate output. It is built on ggml.\\
+  \glsentry{inferenceuser}{Inference user} & A person, or a tool acting for one, who sends prompts to a Lake network and gets responses back.\\
+  \glsentry{ipc}{IPC} & Inter-process communication. Passing data between processes on the same machine.\\
+  \glsentry{kvcache}{KV cache} & The key and value tensors each layer stores for past tokens so they are not recomputed. Each node keeps the KV cache for its own layers.\\
+  \glsentry{lake}{Lake} & The system this document specifies. It runs one LLM across several devices on a local network using model layer partitioning.\\
+  \glsentry{lakeclient}{Lake Client} & The Lake application installed on each device, and the component people use. Every node runs one. The operator forms a Lake network, loads a model, and views performance from the Lake Client on the leader node, and a device owner confirms joining from the Lake Client on their own device.\\
+  \glsentry{lakenetwork}{Lake network} & The nodes on one local network that have joined to serve one model.\\
+  \glsentry{latency}{Latency} & The time between the start of an inference request and a defined event, such as the first token or the end of the response.\\
+  \glsentry{layer}{Layer} & One of the stacked stages of a transformer model. Lake splits a model between nodes at layer boundaries.\\
+  \glsentry{leader}{Leader node} & The node whose operator formed the Lake network. It runs the Model Partitioner, serves the API, and monitors the followers.\\
+  \glsentry{llm}{LLM} & Large language model. An AI model trained on a large body of text and used to generate text.\\
+  \glsentry{partitioning}{Model layer partitioning} & Splitting an LLM's layers into consecutive ranges and giving each range to a different node.\\
+  \glsentry{partitioner}{Model Partitioner} & The Lake component on the leader node that decides which layers each node holds, based on each node's memory, compute, and network performance.\\
+  \glsentry{moscow}{MoSCoW} & A prioritisation scheme that sorts requirements into Must have, Should have, Could have, and Won't have.\\
+  \glsentry{nist}{NIST} & National Institute of Standards and Technology. The United States standards agency.\\
+  \glsentry{node}{Node} & A device running the Lake Client that has joined a Lake network.\\
+  \glsentry{ocr}{OCR} & Optical character recognition. Converting images of text into machine-readable text.\\
+  \glsentry{openaiapi}{OpenAI-compatible API} & An HTTP API with the same request and response formats as the OpenAI API, so clients written for OpenAI work with Lake unchanged.\\
+  \glsentry{operator}{Operator} & The person who forms a Lake network, loads a model, and monitors performance from the Lake Client. Also called the Lake operator.\\
+  \glsentry{p2p}{P2P} & Peer-to-peer. A direct connection between two nodes that does not go through the leader. Neighbouring nodes send tensors this way.\\
+  \glsentry{partition}{Partition} & A consecutive range of a model's layers assigned to one node.\\
+  \glsentry{scheme}{Partitioning scheme} & The assignment of partitions to nodes for a whole model.\\
+  \glsentry{pegs}{PEGS} & Meyer's four-chapter structure for a requirements document: Project, Environment, Goals, and System.\\
+  \glsentry{perplexity}{Perplexity} & A measure of how well a model predicts a body of text, where lower is better. Used to compare a split model with the unsplit one.\\
+  \glsentry{pipeda}{PIPEDA} & Personal Information Protection and Electronic Documents Act. Canada's private-sector privacy law.\\
+  \glsentry{poc}{PoC} & Proof of concept. The first working demonstration of the system.\\
+  \glsentry{prefill}{Prefill} & The first phase of a request, where the whole prompt runs through the model to fill the KV cache before the first output token.\\
+  \glsentry{quantization}{Quantisation} & Converting a model's weights to a lower-precision format to reduce memory use.\\
+  \glsentry{raci}{RACI} & A chart showing who is Responsible, Accountable, Consulted, and Informed for each piece of work.\\
+  \glsentry{rest}{REST} & Representational state transfer. A style of HTTP API where clients read and change named resources.\\
+  \glsentry{rpc}{RPC} & Remote procedure call. Calling a function on another machine as if it were local.\\
+  \glsentry{rtt}{RTT} & Round-trip time. The time for a message to reach another node and for the reply to come back.\\
+  \glsentry{session}{Session} & A period of interaction with Lake in which one or more inference requests are served. For the operator, it runs from forming a Lake network to shutting it down. For an inference user, it is one conversation whose context is kept between prompts.\\
+  \glsentry{srs}{SRS} & Software Requirements Specification. This document.\\
+  \glsentry{streaming}{Streaming} & Returning a response token by token as it is generated.\\
+  \glsentry{ta}{TA} & Teaching assistant. The course staff member who advises the team and assesses its deliverables.\\
+  \glsentry{telemetry}{Telemetry} & Usage statistics, crash reports, update checks, or any other data that software sends to its developer or a third party. Lake sends none.\\
+  \glsentry{tensor}{Tensor} & A multi-dimensional array of numbers. Weights, activations, and the KV cache are all tensors.\\
+  \glsentry{tensorio}{Tensor I/O} & The Lake component that compresses, sends, receives, and decompresses tensors between neighbouring nodes.\\
+  \glsentry{token}{Token} & A unit of text processed by an LLM, typically a word or part of a word.\\
+  \glsentry{throughput}{Token throughput} & The number of tokens generated per unit time, usually tokens per second.\\
+  \glsentry{toolcalling}{Tool calling} & An OpenAI API feature where the model asks the client to run a named function and return the result.\\
+  \glsentry{transformer}{Transformer} & The neural network architecture of current LLMs, built from a stack of layers.\\
+  \glsentry{ui}{UI} & User interface. The part of a program a person interacts with. Lake's UI is the Lake Client.\\
+  \glsentry{vv}{V\&V} & Verification and validation. Verification checks that the system meets its requirements. Validation checks that it is the right system for its stakeholders.\\
+  \glsentry{weights}{Weights} & The learned parameters of a model that determine its behaviour. Lake never modifies them.\\
+  \glsentry{x86}{x86\_64} & The 64-bit instruction set of Intel and AMD processors. One of the two CPU architectures Lake supports.\\
+\end{longtable}
 
 \newpage
 
