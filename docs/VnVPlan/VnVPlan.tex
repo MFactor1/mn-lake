@@ -353,10 +353,10 @@ The implementation will utilize a combination of code review, tests, benchmarks,
   Tests for Lake's end-to-end behavior that may require multiple devices, various supported GPU backends and operating systems, and varying degrees of system capabilities will be run on team hardware before major releases or demonstrations. System test coverage will identify the operating system, CPU architecture, GPU backends, and system capability metrics (RAM/VRAM, CPU/GPU performance). Combinations of system configurations and capabilities that are are not tested will be reported as untested in the V\&V report. Each recorded result will also identify the commit of the current code version, the model as well its quantization, node configuration, and test inputs for repeatability.
 
   \item \textbf{Performance Verification:}
-  Performance metrics such as Lake's capacity for model size, concurrent request throughput, output quality, will be used to verify optimizations result in quantitative performance gain, and that changes do not regress performance, as specified in Section 4.2.
+  Performance metrics such as Lake's capacity for model size, concurrent request throughput, and output quality will be used to verify that optimizations result in quantitative performance gain, and that changes do not regress performance, as specified in Section 4.2.
 
   \item \textbf{Defect Tracking:}
-  Failed CI checks will block pull requests from being merged, and review findings if too large in scope to be addressed in the pull request will be filed as GitHub issues. Regression tests will be added when a failure is identified to prevent it from recurring.
+  Failed CI checks will block pull requests from being merged. If review findings are too large in scope to be addressed in the pull request, they will instead be filed as GitHub issues. Regression tests will be added when a failure is identified to prevent it from recurring.
 \end{itemize}
 
 \subsection{Automated Testing and Verification Tools}
@@ -364,22 +364,22 @@ The implementation will utilize a combination of code review, tests, benchmarks,
 The following testing and verification tools will be used in accordance with the technologies specified in the Development Plan.
 \begin{itemize}
   \item \textbf{Testing frameworks:}
-  \texttt{pytest} will be used for Python components, \texttt{cargo test} for Rust components, and \texttt{Vitest} for TypeScript components. Tests will cover behavior around the components of the coordinator, model partitioner, inference engine, Tensor I/O, and the Lake client.
+  \texttt{pytest}~\citep{Pytest} will be used for Python components, \texttt{cargo test}~\citep{CargoTest} for Rust components, and \texttt{Vitest}~\citep{Vitest} for TypeScript components. Tests will cover behavior around the components of the coordinator, model partitioner, inference engine, Tensor I/O, and the Lake client.
 
   \item \textbf{Static checks:}
-  \texttt{Ruff} will be used for Python code, \texttt{Clippy} and \texttt{rustfmt} will be used for Rust code, and \texttt{ESLint} and \texttt{Prettier} will be used for TypeScript code. These checks will be run on commit hooks and pull request CI.
+  \texttt{Ruff}~\citep{Ruff} will be used for Python code, \texttt{Clippy}~\citep{Clippy} and \texttt{rustfmt}~\citep{Rustfmt} will be used for Rust code, and \texttt{ESLint}~\citep{ESLint} and \texttt{Prettier}~\citep{Prettier} will be used for TypeScript code. These checks will be run on commit hooks and pull request CI.
 
   \item \textbf{Continuous integration:}
-  GitHub Actions will be used to run checks and automated tests on Linux, Windows, and macOS runners. To minimize CI minutes, applicable tests will use lightweight models across local processes. Tests requiring specific hardware that GitHub runners do not provide will instead be run on team hardware outside of the CI.
+  GitHub Actions~\citep{GitHubActions} will be used to run checks and automated tests on Linux, Windows, and macOS runners. To minimize CI minutes, applicable tests will use lightweight models across local processes. Tests requiring specific hardware that GitHub runners do not provide will instead be run on team hardware outside of the CI.
 
   \item \textbf{Code coverage:}
-  \texttt{pytest-cov} will be used for Python code coverage, and \texttt{cargo-llvm-cov} will be used for Rust code coverage. Code coverage reports will be generated that summarize which components and code are not exercised by a test suite.
+  \texttt{pytest-cov}~\citep{PytestCov} will be used for Python code coverage, and \texttt{cargo-llvm-cov}~\citep{CargoLlvmCov} will be used for Rust code coverage. Code coverage reports will be generated that summarize which components and code are not exercised by a test suite.
 
   \item \textbf{Memory and network checks:}
-  \texttt{AddressSanitizer} will be used for verifying unsafe \texttt{ggml} integrations. \texttt{tc netem} on Linux will be used for packet loss and delays as specified in Section 4.2.
+  \texttt{AddressSanitizer}~\citep{AddressSanitizer} will be used for verifying unsafe \texttt{ggml}~\citep{Ggml} integrations. \texttt{tc netem}~\citep{TcNetem} on Linux will be used for packet loss and delays as specified in Section 4.2.
 
   \item \textbf{Performance comparisons:}
-  Scripts will be used to measure concurrent request throughput, as well as compare model accuracy scores against the same model served by \texttt{llama-server} as defined in Section 4.2.
+  Scripts will be used to measure concurrent request throughput, as well as compare model accuracy scores against the same model served by \texttt{llama-server}~\citep{LlamaCpp} as defined in Section 4.2.
 \end{itemize}
 
 \subsection{Software Validation}
