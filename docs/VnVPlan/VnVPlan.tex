@@ -3,6 +3,7 @@
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{hyperref}
+\usepackage{float}
 \hypersetup{
     colorlinks,
     citecolor=blue,
@@ -72,15 +73,11 @@ in.}
 \section{Symbols, Abbreviations, and Acronyms}
 
 \renewcommand{\arraystretch}{1.2}
-\begin{longtable}{@{}p{0.3\textwidth} p{\dimexpr0.7\textwidth-2\tabcolsep\relax}@{}}
-  \toprule
-  \textbf{Term} & \textbf{Description}\\
-  \midrule
-  \endfirsthead
-  \toprule
-  \textbf{Term} & \textbf{Description}\\
-  \midrule
-  \endhead
+\begin{tabular}{l p{10cm}} 
+  \toprule		
+  \textbf{Symbol/Acronym} & \textbf{Description}\\
+  \midrule 
+  SOLID\label{SOLID} & Acronym for specifying design principles. Stands for Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion. \\
   \bottomrule
   \endfoot
   \bottomrule
@@ -214,47 +211,108 @@ how they relate to your VnV efforts.}
 
 \section{Plan}
 
-\wss{Introduce this section.  You can provide a roadmap of the sections to
-  come.}
+The following is a set of verification practices that the \progname{} team will use to ensure that
+requirements, design, implementation, and testing are each verified throughout the development process.
+
+\hyperref[sec:VnVTeam]{3.1} begins by establishing team roles specifically for project verification. Following this,
+\hyperref[sec:SRSVer]{3.2}, \hyperref[sec:DesignVer]{3.3}, and \hyperref[sec:VnVVer]{3.4} specify how the team will verify
+various non-code artifacts - the \citet{SRS}, design, and the verification and validation plan (this document).
+
+Finally, \hyperref[sec:ImpVer]{3.5} - Implementation Verification, \hyperref[sec:AutoTestVer]{3.6} - Automated Testing and
+Verification Tools, and \hyperref[sec:SoftVal]{3.7} - Software Validation provide further specification on how code artifacts
+will be validated and verified.
 
 \subsection{Verification and Validation Team}
+\label{sec:VnVTeam}
 
-\wss{Your teammates.  Maybe your supervisor.
-  You should do more than list names.  You should say what each person's role is
-  for the project's verification.  A table is a good way to summarize this information.}
+The team will take on overall responsibility for the execution of Verification and Validation, based on the following
+roles and responsibilities.
+
+\begin{table}[H]
+\centering
+\caption{\progname{} Verification and Validation Team}
+\label{tab:alternatives}
+\begin{tabular}{| p{3.75cm} | p{3.75cm} | p{6.5cm} |}
+\hline
+\textbf{Team Member} & \textbf{Role} & \textbf{Verification and Validation Responsibilities} \\
+\hline
+Gary Qin & Lead & Oversight of the execution of the plan. Responsible for promoting changes brought forth by R\&D, ensuring new tools are implemented, and that automated
+verification and pipeline tools are operating as intended. \\
+\hline
+Jinwoo Hong & Research \& Development & Research of state of the art verification/validation tooling and providing recommendations to the team.
+If required, small-scale integration of new validation tools for demonstration purposes and to prove effectiveness. \\
+\hline
+Matthew Nesbitt & DevOps \& CI-CD & Integration of identified tools and practices into the project's pipeline, ensuring that all code and documentation changes
+are checked automatically for adherence. Repair and fixes to CI-CD as required. \\
+\hline
+Colin Chambachan & Implementation & Working with Coordinator and Research \& Development team members to implement tools and practices in the codebase. This
+applies for document- and code-based verification and validation. \\
+\hline
+Ethan Walsh & Coordinator & Ensuring that each component of the plan has been executed to the team's quality standard. 
+Additionally, tracking updates to plan and updating documentation to reflect what is up-to-date. \\
+\hline
+\end{tabular}
+\end{table}
 
 \subsection{SRS Verification}
+\label{sec:SRSVer}
 
-\wss{List any approaches you intend to use for SRS verification.  This may
-  include ad hoc feedback from reviewers, like your classmates (like your
-  primary reviewer), or you may plan for something more rigorous/systematic.}
+In order to ensure that the SRS meets expectations, and that the project meets what was originally set out in the SRS,
+the following verification methods will be used:
 
-\wss{If you have a supervisor for the project, you shouldn't just say they will
-read over the SRS.  You should explain your structured approach to the review.
-Will you have a meeting?  What will you present?  What questions will you ask?
-Will you give them instructions for a task-based inspection?  Will you use your
-issue tracker?}
+\begin{itemize}
+  \item \textbf{External Peer Review}: Since the team aims to validate their project externally and \progname{} has no designated supervisor, the team will seek
+  external feedback from a peer who is not a member of the Capstone course. This peer should be familiar with the project and its goals at a high-level, 
+  possess relevant background knowledge, and can perform an ad-hoc review. This allows the team to surface new insights and improve the readability and quality of their SRS.
+  \item \textbf{Internal Peer Review}: As with each document in the Capstone project, there is a review process performed by another team.
+  This review aims to find consistency and content issues within the document, and will be used to provide the team additional feedback.
+  \item \textbf{GitHub Issue Tracking}: All feedback provided to the team will be noted and converted into issues on GitHub. This allows the team to maintain a backlog
+  of SRS-related issues and fix identified problems.
+  \item \textbf{Internal Team Verification} (Once per deliverable): As the team progresses through the term, they will review their
+  progress to ensure it aligns with what was set out in the SRS document. In the case new code or documentation does not align
+  with the SRS, the team will discuss the necessary fix. This will result in either the SRS being amended to reflect the project more accurately,
+  or the deliverable will be changed. The goal of this process is to guarantee consistency: what is stated in any code or documentation after the SRS
+  should logically follow from what was prescribed in it.
+  \item \textbf{SRS Checklist}: In order to complete internal team verification, the lead for verification and validation (as set out in \hyperref[sec:VnVTeam]{3.1}) will
+  create a checklist of criteria. This checklist will be used by the team to ensure each deliverable logically follows from the SRS, and if not, the necessary changes have 
+  been completed and tracked sufficiently.
 
-\wss{Maybe create an SRS checklist?}
+\end{itemize}
 
 \subsection{Design Verification}
+\label{sec:DesignVer}
 
-\wss{Plans for design verification}
+Design verification of Lake will begin after November 16, when the first design document will be complete. In order to verify the design of Lake, the following methods will be used:
 
-\wss{The review will include reviews by your classmates}
+\begin{itemize}
+  \item \textbf{Peer Review}: Similar to verification of the SRS that was detailed in \hyperref[sec:SRSVer]{3.2}, peer review will be used to verify the design documentation.
+  This will involve the traditional peer review process from another Capstone team, along with external review. External review will be used as a method to challenge the team's assumptions
+  and point out potential design flaws.
+  \item \textbf{Inspection of Module Guide and Module Interface Specification}: After the document has been completed, the team will perform a review of the design documentation.
+  This will be used to identify inconsistencies, gaps between design and requirements, and flag areas of concern. Any areas of concern should be noted as GitHub issues and resolved prior to further design work.
+  \item \textbf{Checklist-based Verification}: The team will combine results of the peer review along with an existing checklist to complete the design verification process. The checklist will focus on the following:
+    \begin{itemize}
+      \item Adherence to general software design principles and practices (e.g., \hyperref[SOLID]{SOLID})
+      \item Adherence to modular design principles (minimal effort to build additional features)
+      \item Consideration for design scaling and performance-oriented non-functional requirements (ability to scale and expand the design to accommodate additional requests, devices, and traffic).
+    \end{itemize}
+\end{itemize}
 
-\wss{Create a checklists?}
 
 \subsection{Verification and Validation Plan Verification}
+\label{sec:VnVVer}
 
-\wss{The verification and validation plan is an artifact that should also be
-verified.  Techniques for this include review and mutation testing.}
+In order to verify the quality of the team's verification and validation plan, the team will employ the following methods:
 
-\wss{The review will include reviews by your classmates}
-
-\wss{Create a checklists?}
+\begin{itemize}
+  \item \textbf{Internal Review}: Throughout the preparation of the document, the team will review individual document sections and how they connect to guarantee quality and consistency.
+  \item \textbf{Peer Review}: The team will use the peer review process to catch additional issues or inconsistencies. This will be used to complement the completed internal review.
+  \item \textbf{Ad-Hoc Team Meeting}: The team will schedule a one-time meeting after the delivery of the VnV plan to assess its feasibility, as well as assign responsibilities to each member.
+  This meeting will aim to assess the effectiveness and practicality of the current plan, and make changes if required.
+\end{itemize}
 
 \subsection{Implementation Verification}
+\label{sec:ImpVer}
 
 \wss{You should at least point to the tests listed in this document and the unit
   testing plan.}
@@ -268,6 +326,7 @@ walkthrough.  There is also a possibility of using the final presentation (in
 CAS741) for a partial usability survey.}
 
 \subsection{Automated Testing and Verification Tools}
+\label{sec:AutoTestVer}
 
 \wss{What tools are you using for automated testing.  Likely a unit testing
   framework and maybe a profiling tool, like ValGrind.  Other possible tools
@@ -285,6 +344,7 @@ that document.}
   implementation.}
 
 \subsection{Software Validation}
+\label{sec:SoftVal}
 
 \wss{If there is any external data that can be used for validation, you should
   point to it here.  If there are no plans for validation, you should state that
