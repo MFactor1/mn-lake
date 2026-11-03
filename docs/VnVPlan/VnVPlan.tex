@@ -15,6 +15,7 @@
 \usepackage{longtable}
 \usepackage{placeins}
 \usepackage{booktabs}
+\usepackage{float}
 
 \input{../Comments.text}
 \input{../Common.text}
@@ -407,65 +408,185 @@ Feedback from the software validation will be recorded as GitHub issues and used
 
 \section{System Tests}
 
-\wss{There should be text between all headings, even if it is just a roadmap of
-the contents of the subsections.}
+This section contains system-level tests to comprehensively validate all functional and non-functional
+requirements from the Lake SRS. These tests are intended to be run once the Lake system is complete, using
+a variety of models and devices to simulate real-world use.
 
-\subsection{Tests for Functional Requirements}
-\label{sec:fr-tests}
+\subsection{Tests for Functional Requirements}\label{sec:fr-tests}
 
-\wss{Subsets of the tests may be in related, so this section is divided into
-  different areas.  If there are no identifiable subsets for the tests, this
-  level of document structure can be removed.}
+The tests below are grouped by which functional modules are primarily tested
+by each test. Each test lists which functional requirements from Section S.2 of the SRS
+they verify to ensure full coverage of all SRS S.2 functional requirements with the exception of:
+\begin{itemize}
+	\item \textit{FR.S.2.3} (Model Partitioner): Testing true equivalency requires deeper access to internal graph structures
+		than is accessible to a system-level test.
+\end{itemize}
 
-\wss{Include a blurb here to explain why the subsections below
-  cover the requirements.  References to the SRS would be good here.}
+\vspace{5mm}
 
-\subsubsection{Area of Testing1}
+\noindent Unless otherwise stated, the following can be assumed for all tests in \autoref{sec:fr-tests}:
+\begin{itemize}
+	\item The model loaded in testing is a \glink{gguf}{GGUF} file containing SmolLM2-135M-Instruct, Q8\_0 (~150Mb).
+	\item Multiple nodes are simulated using multiple processes on the same machine.
+	\item Network connections are simulated between processes using the loopback interface.
+	\item Network throttling/instability will be simulated using tc netem \citep{TcNetem}.
+	\item Tests outside of \autoref{subsec:lake-client-system-tests} performing actions typically done through the Lake
+		Client, are performed by sending requests through the REST API used by the Lake Client (see SRS Section
+		S.3). This allows said tests to be automated by avoiding interaction with the UI.
+\end{itemize}
 
-\wss{It would be nice to have a blurb here to explain why the subsections below
-  cover the requirements.  References to the SRS would be good here.  If a section
-  covers tests for input constraints, you should reference the data constraints
-  table in the SRS.}
-		
-\paragraph{Title for Test}
-
+\subsubsection{Coordinator (S.2.1)}
 \begin{enumerate}
-
-\item{test-id1\\}
-
-Control: Manual versus Automatic
-					
-Initial State: 
-					
-Input: 
-					
-Output: \wss{The expected result for the given inputs.  Output is not how you
-are going to return the results of the test.  The output is the expected
-result.}
-
-Test Case Derivation: \wss{Justify the expected value given in the Output field}
-					
-How test will be performed: 
-					
-\item{test-id2\\}
-
-Control: Manual versus Automatic
-					
-Initial State: 
-					
-Input: 
-					
-Output: \wss{The expected result for the given inputs}
-
-Test Case Derivation: \wss{Justify the expected value given in the Output field}
-
-How test will be performed: 
-
+	\item{T.FR.CRD.1}\label{T.FR.CRD.1} \\
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake loaded on \textit{MIN\_DEVICES} devices. \\
+		\textbf{Input}: On the leader device, invite the other device to be part
+		of a cluster. On each other device, accept the request. \\
+		\textbf{Output}: Both devices report being in the network, and report being
+		ready to load a model. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.1.4}, \textit{FR.S.1.5}, \textit{FR.S.1.15},
+		\textit{FR.S.1.17}, \textit{FR.S.1.18}, \textit{FR.S.1.20}, \textit{FR.S.1.21},
+		\textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.7}, \textit{FR.S.1.16}, \textit{FR.S.4.1}.
+	\item{T.FR.CRD.2}\label{T.FR.CRD.2} \\
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake network created with \textit{MIN\_DEVICES} devices. \\
+		\textbf{Input}: Load \glink{gguf}{GGUF} file into network. \\
+		\textbf{Output}: All devices report successful loading, and report ready for inference. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.1.1}, \textit{FR.S.1.6}, \textit{FR.S.1.8},
+		\textit{FR.S.1.19}, \textit{FR.S.3.1}.
+	\item{T.FR.CRD.3}\label{T.FR.CRD.3} \\
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Model loaded and serving requests in Lake network with \textit{MIN\_DEVICES}
+		devices. \\
+		\textbf{Input}: Reduce the throughput of a follower node below \textit{FAIL\_THRESHOLD}. \\
+		\textbf{Output}: The Lake network rebuilds and redistributes the model across the nodes,
+		excluding the modified node.
+		Any in-progress requests are retried, and the network begins accepting new requests. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.1.7}, \textit{FR.S.1.10}, \textit{FR.S.1.11},
+		\textit{FR.S.1.13}, \textit{FR.S.1.22}, \textit{FR.S.1.23}, \textit{FR.S.1.2},
+		\textit{FR.S.1.3}, \textit{FR.S.3.4}, \textit{FR.S.4.5}.
+	\item{T.FR.CRD.4}\label{T.FR.CRD.4} \\
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Model loaded and serving requests in Lake network with \textit{MIN\_DEVICES}
+		devices. \\
+		\textbf{Input}: Add a new device to the Lake network. \\
+		\textbf{Output}: The Lake network rebuilds and redistributes the model across the nodes,
+		including the newly added node. Any in-progress requests are retried, and the network begins
+		accepting new requests.\\
+		\textbf{Derivation}: Verifies \textit{FR.S.1.12}, \textit{FR.S.1.13}.
+	\item{T.FR.CRD.5}\label{T.FR.CRD.5} \\
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Model loaded in Lake network with \textit{MIN\_DEVICES} devices. \\
+		\textbf{Input}: Leader node is killed. \\
+		\textbf{Output}: After \textit{LEADER\_TIMEOUT}, the Lake network disbands and each
+		follower node unloads its model partition. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.1.24}, \textit{FR.S.1.25}.
+\end{enumerate}
+\subsubsection{Model Partitioner (S.2.2)}
+\begin{enumerate}
+	\item{T.FR.MP.1}\label{T.FR.MP.1} \\
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake network created with \textit{MIN\_DEVICES} devices. \\
+		\textbf{Input}: Load \glink{gguf}{GGUF} file into network. \\
+		\textbf{Output}: All devices report Lake's \glink{gpu}{GPU}-accessible memory usage of not more
+		than: $total - \textit{MEMORY\_MARGIN}$. The ratio of the usage of
+		\glink{gpu}{GPU}-accessible memory between devices is proportional to device capabilities. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.2.1}, \textit{FR.S.2.4}, \textit{FR.S.1.8}.
+	\item{T.FR.MP.2}\label{T.FR.MP.2} \\
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake network created with \textit{MIN\_DEVICES} devices. \\
+		\textbf{Input}: Load \glink{gguf}{GGUF} file where $kv\_cache\_size + model\_size +
+		(n\_nodes\times\textit{MEMORY\_MARGIN})$ is larger
+		than the network's sum of memory. \\
+		\textbf{Output}: Leader node reports that there is no valid partition across the network. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.2.2}.
+\end{enumerate}
+\subsubsection{Inference Engine (S.2.3)}
+\begin{enumerate}
+	\item{T.FR.IE.1}\label{T.FR.IE.1} \\
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake network created and model file loaded with \textit{MIN\_DEVICES} devices. \\
+		\textbf{Input}: Send inference request to OpenAI compatible API. \\
+		\textbf{Output}: Network outputs model response via OpenAI compatible API. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.3.2}, \textit{FR.S.3.3}, \textit{FR.S.4.3}, \textit{FR.S.4.4},
+		\textit{FR.S.1.9}.
+	\item{T.FR.IE.2}\label{T.FR.IE.2} \\
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake network created and model file loaded with \textit{MIN\_DEVICES} devices. \\
+		\textbf{Input}: Send concurrent inference requests to OpenAI compatible API. \\
+		\textbf{Output}: Network outputs model responses concurrently via OpenAI compatible API. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.3.5}, \textit{FR.S.4.6}, \textit{FR.S.1.14}.
+\end{enumerate}
+\subsubsection{Tensor I/O (S.2.4)}
+\begin{enumerate}
+	\item{T.FR.TIO.1}\label{T.FR.TIO.1} \\
+		\textbf{Control}: Manual \\
+		\textbf{Initial State}: Lake network created and serving requests with \textit{MIN\_DEVICES} devices. \\
+		\textbf{Input}: Reduce the throughput of a connection between nodes by \textit{THROUGHPUT\_REDUCTION}. \\
+		\textbf{Output}: Token throughput initially drops, then \glink{cpu}{CPU} usage increases on both the
+		sending and receiving devices due to increasing compression. Throughput then increases. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.4.2}.
+\end{enumerate}
+\subsubsection{Lake Client (S.2.5)}\label{subsec:lake-client-system-tests}
+\begin{enumerate}
+	\item{T.FR.LCLI.1}\label{T.FR.LCLI.1} \\
+		\textbf{Control}: Manual \\
+		\textbf{Initial State}: Lake running on \textit{MIN\_DEVICES} devices on the same network. \\
+		\textbf{Input}: User scans for devices, selects the desired devices, and creates a network with them.
+		The user then accepts the join requests on each device's Lake Client. \\
+		\textbf{Output}: All devices report successfully forming a network. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.3}, \textit{FR.S.5.7}.
+	\item{T.FR.LCLI.2}\label{T.FR.LCLI.2} \\
+		\textbf{Control}: Manual \\
+		\textbf{Initial State}: Lake running and model loaded on \textit{MIN\_DEVICES} on the same network. \\
+		\textbf{Input}: Inference request is issued through the OpenAI compatible API. \\
+		\textbf{Output}: Performance metrics for the network and each node are displayed by
+		the Lake Client. The weakest links in the system forming bottlenecks are highlighted by the Lake Client. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.5.5}, \textit{FR.S.5.6}.
+	\item{T.FR.LCLI.3}\label{T.FR.LCLI.3} \\
+		\textbf{Control}: Manual \\
+		\textbf{Initial State}: Lake network created with \textit{MIN\_DEVICES} devices. \\
+		\textbf{Input}: Load \glink{gguf}{GGUF} file where $kv\_cache\_size + model\_size +
+		(n\_nodes\times\textit{MEMORY\_MARGIN})$ is larger
+		than the network's sum of memory. \\
+		\textbf{Output}: Lake Client reports that there is no valid partition across the network. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.5.4}.
 \end{enumerate}
 
-\subsubsection{Area of Testing2}
+Table~\ref{tab:trace-fr} lists the system tests that verify each functional requirement.
+Every functional requirement is supported by at least one system test, with the exceptions
+listed at the start of \autoref{sec:fr-tests}.
 
-...
+\begin{table}[H]
+\centering
+\caption{Traceability of system tests to functional requirements}
+\label{tab:trace-fr}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Test Case ID} & \textbf{Requirements Verified} \\
+\midrule
+\hyperref[T.FR.CRD.1]{T.FR.CRD.1} & \textit{FR.S.1.4}, \textit{FR.S.1.5}, \textit{FR.S.1.15},
+		\textit{FR.S.1.17}, \textit{FR.S.1.18}, \textit{FR.S.1.20}, \textit{FR.S.1.21},
+		\textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.7}, \textit{FR.S.1.16}, \textit{FR.S.4.1} \\
+\hyperref[T.FR.CRD.2]{T.FR.CRD.2} & \textit{FR.S.1.1}, \textit{FR.S.1.6}, \textit{FR.S.1.8},
+		\textit{FR.S.1.19}, \textit{FR.S.3.1} \\
+\hyperref[T.FR.CRD.3]{T.FR.CRD.3} & \textit{FR.S.1.7}, \textit{FR.S.1.10}, \textit{FR.S.1.11},
+		\textit{FR.S.1.13}, \textit{FR.S.1.22}, \textit{FR.S.1.23}, \textit{FR.S.1.2},
+		\textit{FR.S.1.3}, \textit{FR.S.3.4}, \textit{FR.S.4.5} \\
+\hyperref[T.FR.CRD.4]{T.FR.CRD.4} & \textit{FR.S.1.12}, \textit{FR.S.1.13} \\
+\hyperref[T.FR.CRD.5]{T.FR.CRD.5} & \textit{FR.S.1.24}, \textit{FR.S.1.25} \\
+\hyperref[T.FR.MP.1]{T.FR.MP.1} & \textit{FR.S.2.1}, \textit{FR.S.2.4}, \textit{FR.S.1.8} \\
+\hyperref[T.FR.MP.2]{T.FR.MP.2} & \textit{FR.S.2.2} \\
+\hyperref[T.FR.IE.1]{T.FR.IE.1} & \textit{FR.S.3.2}, \textit{FR.S.3.3}, \textit{FR.S.4.3}, \textit{FR.S.4.4},
+		\textit{FR.S.1.9} \\
+\hyperref[T.FR.IE.2]{T.FR.IE.2} & \textit{FR.S.3.5}, \textit{FR.S.4.6}, \textit{FR.S.1.14} \\
+\hyperref[T.FR.TIO.1]{T.FR.TIO.1} & \textit{FR.S.4.2} \\
+\hyperref[T.FR.LCLI.1]{T.FR.LCLI.1} & \textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.3}, \textit{FR.S.5.7} \\
+\hyperref[T.FR.LCLI.2]{T.FR.LCLI.2} & \textit{FR.S.5.5}, \textit{FR.S.5.6} \\
+\hyperref[T.FR.LCLI.3]{T.FR.LCLI.3} & \textit{FR.S.5.4} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{Tests for Nonfunctional Requirements}
 \label{sec:nfr-tests}
@@ -1331,6 +1452,7 @@ and \textit{CAPACITY\_MODEL}) are defined in Table~\ref{tab:test-models}.
 \textit{LOSS\_LEVELS} & 1\%, 5\%, \textit{MAX\_LOSS} & Packet loss and
   corruption rates in \hyperref[T.NFR.FT.2]{T.NFR.FT.2}. \\
 \textit{IDLE\_TIME} & 10 min & Idle period captured in \hyperref[T.NFR.PRIV.2]{T.NFR.PRIV.2}. \\
+\textit{THROUGHPUT\_REDUCTION} & 50\% & Network connection throughput reduction in \hyperref[T.FR.TIO.1]{T.FR.TIO.1}.\\
 \bottomrule
 \end{tabularx}
 \end{table}
