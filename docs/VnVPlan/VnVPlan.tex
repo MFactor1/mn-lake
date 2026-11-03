@@ -426,122 +426,122 @@ they verify to ensure full coverage of all SRS S.2 functional requirements with 
 \subsubsection{Coordinator (S.2.1)}
 \begin{enumerate}
 	\item{T.FR.CRD.1}\label{T.FR.CRD.1} \\
-		Control: Automatic \\
-		Initial State: Lake loaded on \textit{MIN\_NODES} devices. \\
-		Input: On the leader device, invite the other device to be part
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake loaded on \textit{MIN\_NODES} devices. \\
+		\textbf{Input}: On the leader device, invite the other device to be part
 		of a cluster. On each other device, accept the request. \\
-		Output: Both devices report being in the network, and report being
+		\textbf{Output}: Both devices report being in the network, and report being
 		ready to load a model. \\
-		Derivation: Verifies \textit{FR.S.1.4}, \textit{FR.S.1.5}, \textit{FR.S.1.15},
+		\textbf{Derivation}: Verifies \textit{FR.S.1.4}, \textit{FR.S.1.5}, \textit{FR.S.1.15},
 		\textit{FR.S.1.17}, \textit{FR.S.1.18}, \textit{FR.S.1.20}, \textit{FR.S.1.21},
 		\textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.7}, \textit{FR.S.1.16}, \textit{FR.S.4.1}.
 	\item{T.FR.CRD.2}\label{T.FR.CRD.2} \\
-		Control: Automatic \\
-		Initial State: Lake network created with \textit{MIN\_NODES} devices. \\
-		Input: Load \glink{gguf}{GGUF} file into network. \\
-		Output: All devices report successful loading, and report ready for inference. \\
-		Derivation: Verifies \textit{FR.S.1.1}, \textit{FR.S.1.6}, \textit{FR.S.1.8},
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake network created with \textit{MIN\_NODES} devices. \\
+		\textbf{Input}: Load \glink{gguf}{GGUF} file into network. \\
+		\textbf{Output}: All devices report successful loading, and report ready for inference. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.1.1}, \textit{FR.S.1.6}, \textit{FR.S.1.8},
 		\textit{FR.S.1.19}, \textit{FR.S.3.1}.
 	\item{T.FR.CRD.3}\label{T.FR.CRD.3} \\
-		Control: Automatic \\
-		Initial State: Model loaded and serving requests in Lake network with \textit{MIN\_NODES}
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Model loaded and serving requests in Lake network with \textit{MIN\_NODES}
 		devices. \\
-		Input: Reduce the throughput of a follower node below \textit{FAIL\_THRESHOLD}. \\
-		Output: The Lake network rebuilds and redistributes the model across the nodes,
+		\textbf{Input}: Reduce the throughput of a follower node below \textit{FAIL\_THRESHOLD}. \\
+		\textbf{Output}: The Lake network rebuilds and redistributes the model across the nodes,
 		excluding the modified node.
 		Any in-progress requests are retried, and the network begins accepting new requests. \\
-		Derivation: Verifies \textit{FR.S.1.7}, \textit{FR.S.1.10}, \textit{FR.S.1.11},
+		\textbf{Derivation}: Verifies \textit{FR.S.1.7}, \textit{FR.S.1.10}, \textit{FR.S.1.11},
 		\textit{FR.S.1.13}, \textit{FR.S.1.22}, \textit{FR.S.1.23}, \textit{FR.S.1.2},
 		\textit{FR.S.1.3}, \textit{FR.S.3.4}, \textit{FR.S.4.5}.
 	\item{T.FR.CRD.4}\label{T.FR.CRD.4} \\
-		Control: Automatic \\
-		Initial State: Model loaded and serving requests in Lake network with \textit{MIN\_NODES}
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Model loaded and serving requests in Lake network with \textit{MIN\_NODES}
 		devices. \\
-		Input: Add a new device to the Lake network. \\
-		Output: The Lake network rebuilds and redistributes the model across the nodes,
+		\textbf{Input}: Add a new device to the Lake network. \\
+		\textbf{Output}: The Lake network rebuilds and redistributes the model across the nodes,
 		including the newly added node. Any in-progress requests are retried, and the network begins
 		accepting new requests.\\
-		Derivation: Verifies \textit{FR.S.1.12}, \textit{FR.S.1.13}.
+		\textbf{Derivation}: Verifies \textit{FR.S.1.12}, \textit{FR.S.1.13}.
 	\item{T.FR.CRD.5}\label{T.FR.CRD.5} \\
-		Control: Automatic \\
-		Initial State: Model loaded in Lake network with \textit{MIN\_NODES} devices. \\
-		Input: Leader node is killed. \\
-		Output: After \textit{LEADER\_TIMEOUT}, the Lake network disbands and each
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Model loaded in Lake network with \textit{MIN\_NODES} devices. \\
+		\textbf{Input}: Leader node is killed. \\
+		\textbf{Output}: After \textit{LEADER\_TIMEOUT}, the Lake network disbands and each
 		follower node unloads its model partition. \\
-		Derivation: Verifies \textit{FR.S.1.24}, \textit{FR.S.1.25}, \textit{SR4-2}.
+		\textbf{Derivation}: Verifies \textit{FR.S.1.24}, \textit{FR.S.1.25}, \textit{SR4-2}.
 \end{enumerate}
 \subsubsection{Model Partitioner (S.2.2)}
 \begin{enumerate}
 	\item{T.FR.MP.1}\label{T.FR.MP.1} \\
-		Control: Automatic \\
-		Initial State: Lake network created with \textit{MIN\_NODES} devices. \\
-		Input: Load \glink{gguf}{GGUF} file into network. \\
-		Output: Each device $i$ reports Lake's \glink{gpu}{GPU}-accessible memory usage of not more
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake network created with \textit{MIN\_NODES} devices. \\
+		\textbf{Input}: Load \glink{gguf}{GGUF} file into network. \\
+		\textbf{Output}: Each device $i$ reports Lake's \glink{gpu}{GPU}-accessible memory usage of not more
 		than $M_i(1 - \textit{MEMORY\_MARGIN})$, where $M_i$ is the device's free
 		\glink{gpu}{GPU}-accessible memory before loading. The ratio of the usage of
 		\glink{gpu}{GPU}-accessible memory between devices is proportional to device capabilities. \\
-		Derivation: Verifies \textit{FR.S.2.1}, \textit{FR.S.2.4}, \textit{FR.S.1.8}.
+		\textbf{Derivation}: Verifies \textit{FR.S.2.1}, \textit{FR.S.2.4}, \textit{FR.S.1.8}.
 	\item{T.FR.MP.2}\label{T.FR.MP.2} \\
-		Control: Automatic \\
-		Initial State: Lake network created with \textit{MIN\_NODES} devices. \\
-		Input: Load a \glink{gguf}{GGUF} file where $S_{\mathrm{model}} + S_{\mathrm{KV}} >
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake network created with \textit{MIN\_NODES} devices. \\
+		\textbf{Input}: Load a \glink{gguf}{GGUF} file where $S_{\mathrm{model}} + S_{\mathrm{KV}} >
 		(1 - \textit{MEMORY\_MARGIN})\sum_i M_i$, where $S_{\mathrm{model}}$ is the size of the
 		model weights, $S_{\mathrm{KV}}$ the size of the KV cache for \textit{CONTEXT\_MAX} tokens, and
 		$M_i$ the free \glink{gpu}{GPU}-accessible memory of device $i$. \\
-		Output: Leader node reports that there is no valid partition across the network. \\
-		Derivation: Verifies \textit{FR.S.2.2}.
+		\textbf{Output}: Leader node reports that there is no valid partition across the network. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.2.2}.
 \end{enumerate}
 \subsubsection{Inference Engine (S.2.3)}
 \begin{enumerate}
 	\item{T.FR.IE.1}\label{T.FR.IE.1} \\
-		Control: Automatic \\
-		Initial State: Lake network created and model file loaded with \textit{MIN\_NODES} devices. \\
-		Input: Send inference request to OpenAI compatible API. \\
-		Output: Network outputs model response via OpenAI compatible API. \\
-		Derivation: Verifies \textit{FR.S.3.2}, \textit{FR.S.3.3}, \textit{FR.S.4.3}, \textit{FR.S.4.4},
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake network created and model file loaded with \textit{MIN\_NODES} devices. \\
+		\textbf{Input}: Send inference request to OpenAI compatible API. \\
+		\textbf{Output}: Network outputs model response via OpenAI compatible API. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.3.2}, \textit{FR.S.3.3}, \textit{FR.S.4.3}, \textit{FR.S.4.4},
 		\textit{FR.S.1.9}.
 	\item{T.FR.IE.2}\label{T.FR.IE.2} \\
-		Control: Automatic \\
-		Initial State: Lake network created and model file loaded with \textit{MIN\_NODES} devices. \\
-		Input: Send concurrent inference requests to OpenAI compatible API. \\
-		Output: Network outputs model responses concurrently via OpenAI compatible API. \\
-		Derivation: Verifies \textit{FR.S.3.5}, \textit{FR.S.4.6}, \textit{FR.S.1.14}.
+		\textbf{Control}: Automatic \\
+		\textbf{Initial State}: Lake network created and model file loaded with \textit{MIN\_NODES} devices. \\
+		\textbf{Input}: Send concurrent inference requests to OpenAI compatible API. \\
+		\textbf{Output}: Network outputs model responses concurrently via OpenAI compatible API. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.3.5}, \textit{FR.S.4.6}, \textit{FR.S.1.14}.
 \end{enumerate}
 \subsubsection{Tensor I/O (S.2.4)}
 \begin{enumerate}
 	\item{T.FR.TIO.1}\label{T.FR.TIO.1} \\
-		Control: Manual \\
-		Initial State: Lake network created and serving requests with \textit{MIN\_NODES} devices. \\
-		Input: Reduce the throughput of a connection between nodes by \textit{THROUGHPUT\_REDUCTION}. \\
-		Output: Token throughput initially drops, then \glink{cpu}{CPU} usage increases on both the
+		\textbf{Control}: Manual \\
+		\textbf{Initial State}: Lake network created and serving requests with \textit{MIN\_NODES} devices. \\
+		\textbf{Input}: Reduce the throughput of a connection between nodes by \textit{THROUGHPUT\_REDUCTION}. \\
+		\textbf{Output}: Token throughput initially drops, then \glink{cpu}{CPU} usage increases on both the
 		sending and receiving devices due to increasing compression. Throughput then increases. \\
-		Derivation: Verifies \textit{FR.S.4.2}.
+		\textbf{Derivation}: Verifies \textit{FR.S.4.2}.
 \end{enumerate}
 \subsubsection{Lake Client (S.2.5)}\label{subsec:lake-client-system-tests}
 \begin{enumerate}
 	\item{T.FR.LCLI.1}\label{T.FR.LCLI.1} \\
-		Control: Manual \\
-		Initial State: Lake running on \textit{MIN\_NODES} devices on the same network. \\
-		Input: User scans for devices, selects the desired devices, and creates a network with them.
+		\textbf{Control}: Manual \\
+		\textbf{Initial State}: Lake running on \textit{MIN\_NODES} devices on the same network. \\
+		\textbf{Input}: User scans for devices, selects the desired devices, and creates a network with them.
 		The user then accepts the join requests on each device's Lake Client. \\
-		Output: All devices report successfully forming a network. \\
-		Derivation: Verifies \textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.3}, \textit{FR.S.5.7}.
+		\textbf{Output}: All devices report successfully forming a network. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.3}, \textit{FR.S.5.7}.
 	\item{T.FR.LCLI.2}\label{T.FR.LCLI.2} \\
-		Control: Manual \\
-		Initial State: Lake running and model loaded on \textit{MIN\_NODES} devices on the same network. \\
-		Input: Inference request is issued through the OpenAI compatible API. \\
-		Output: Performance metrics for the network and each node are displayed by
+		\textbf{Control}: Manual \\
+		\textbf{Initial State}: Lake running and model loaded on \textit{MIN\_NODES} devices on the same network. \\
+		\textbf{Input}: Inference request is issued through the OpenAI compatible API. \\
+		\textbf{Output}: Performance metrics for the network and each node are displayed by
 		the Lake Client. The weakest links in the system forming bottlenecks are highlighted by the Lake Client. \\
-		Derivation: Verifies \textit{FR.S.5.5}, \textit{FR.S.5.6}.
+		\textbf{Derivation}: Verifies \textit{FR.S.5.5}, \textit{FR.S.5.6}.
 	\item{T.FR.LCLI.3}\label{T.FR.LCLI.3} \\
-		Control: Manual \\
-		Initial State: Lake network created with \textit{MIN\_NODES} devices. \\
-		Input: Load a \glink{gguf}{GGUF} file where $S_{\mathrm{model}} + S_{\mathrm{KV}} >
+		\textbf{Control}: Manual \\
+		\textbf{Initial State}: Lake network created with \textit{MIN\_NODES} devices. \\
+		\textbf{Input}: Load a \glink{gguf}{GGUF} file where $S_{\mathrm{model}} + S_{\mathrm{KV}} >
 		(1 - \textit{MEMORY\_MARGIN})\sum_i M_i$, where $S_{\mathrm{model}}$ is the size of the
 		model weights, $S_{\mathrm{KV}}$ the size of the KV cache for \textit{CONTEXT\_MAX} tokens, and
 		$M_i$ the free \glink{gpu}{GPU}-accessible memory of device $i$. \\
-		Output: Lake Client reports that there is no valid partition across the network. \\
-		Derivation: Verifies \textit{FR.S.5.4}.
+		\textbf{Output}: Lake Client reports that there is no valid partition across the network. \\
+		\textbf{Derivation}: Verifies \textit{FR.S.5.4}.
 \end{enumerate}
 
 
