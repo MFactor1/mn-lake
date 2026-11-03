@@ -3,6 +3,7 @@
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{hyperref}
+\usepackage{float}
 \hypersetup{
     colorlinks,
     citecolor=blue,
@@ -143,6 +144,7 @@ in.}
   \glsentry{rpc}{RPC} & Remote procedure call. Calling a function on another machine as if it were local.\\
   \glsentry{rtt}{RTT} & Round-trip time. The time for a message to reach another node and for the reply to come back.\\
   \glsentry{session}{Session} & A period of interaction with Lake in which one or more inference requests are served. For the operator, it runs from forming a Lake network to shutting it down. For an inference user, it is one conversation whose context is kept between prompts.\\
+  SOLID\label{SOLID} & Acronym for specifying design principles. Stands for Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion. \\
   \glsentry{srs}{SRS} & Software Requirements Specification. This document.\\
   \glsentry{streaming}{Streaming} & Returning a response token by token as it is generated.\\
   \glsentry{ta}{TA} & Teaching assistant. The course staff member who advises the team and assesses its deliverables.\\
@@ -168,143 +170,240 @@ This document ... \wss{provide an introductory blurb and roadmap of the
 
 \section{General Information}
 
+This plan covers the core release of \progname{} as scoped in the SRS.
+
 \subsection{Summary}
 
-\wss{Say what software is being tested.  Give its name and a brief overview of
-  its general functions.}
+The software under test is \progname{}, which runs one large language model
+(LLM) across several consumer devices on a local network. \progname{} splits
+the model by layer and gives each device a consecutive range of layers. The
+operator forms a Lake network from the Lake Client, loads a
+GGUF model, and sends prompts through an OpenAI-compatible API. When a node
+joins or leaves, \progname{} reassigns the layers and keeps serving requests.
+
+All five components are in scope: the Coordinator, the Model Partitioner, the
+Inference Engine, Tensor I/O, and the Lake Client.
 
 \subsection{Objectives}
 
-\wss{State what is intended to be accomplished.  The objective will be around
-  the qualities that are most important for your project.  You might have
-  something like: ``build confidence in the software correctness,''
-  ``demonstrate adequate usability.'' etc.  You won't list all of the qualities,
-  just those that are most important.}
+The qualities we most need confidence in are output correctness, privacy,
+reliability when devices come and go, and performance.
 
-\wss{You should also list the objectives that are out of scope.  You don't have 
-the resources to do everything, so what will you be leaving out.  For instance, 
-if you are not going to verify the quality of usability, state this.  It is also 
-worthwhile to justify why the objectives are left out.}
+Splitting a model must not change what it produces. The split model's
+benchmark scores must stay within \textit{BENCH\_RATIO} of the unsplit
+model's. Related to NFR.S.6.
 
-\wss{The objectives are important because they highlight that you are aware of 
-limitations in your resources for verification and validation.  You can't do everything, 
-so what are you going to prioritize?  As an example, if your system depends on an 
-external library, you can explicitly state that you will assume that external library 
-has already been verified by its implementation team.}
+No node may keep request data after a request finishes, and nothing from a request may
+leave the Lake network except the response to the client. Related to
+NFR.S.10, NFR.S.11, and SR5-2.
+
+For reliability, \progname{} must keep serving requests when a node fails,
+leaves, or joins, and must refuse a model that would run a node out of memory.
+Related to FR.S.1.10 to FR.S.1.12, SR1-3, and SR2-1.
+
+For performance, a Lake network must run a model too large for its biggest
+node, and the number of requests it serves at once within
+\textit{MAX\_DEGRADATION} must grow with the number of nodes. Single-request
+speed is measured but has no pass threshold, since a split model is not
+expected to beat one device on a model that already fits. Related to NFR.S.4
+and NFR.S.5.
+
+Usability is checked with the survey in the appendix rather than a formal
+study. For platforms, we test the operating system, CPU, and GPU combinations
+the team owns and report the rest as untested in the V\&V Report.
+
+We test how \progname{} uses ggml and llama.cpp, not the libraries
+themselves. The content a correctly running model generates is also out of
+scope. The stretch goals (encryption,
+authentication, wireless links, and smartphones) are not tested this year, and
+neither are attacks from inside the local network.
 
 \subsection{Custom Documents}
 
-\wss{Summarize the CDs (Custom Documents) that were tackled by this project.  CDs 
-can include usability testing, code walkthroughs, user documentation, formal
-proof, GenderMag personas, Design Thinking, etc.  CDs should have already
-been approved by the course instructor as included in your problem statement.
-You can use a pull request to update your CDs (in TeamComposition.csv or
-Repos.csv) if your plan changes as a result of the VnV planning exercise.}
+Our custom documents are a Design Thinking Report in the fall and a Performance
+Report in the winter \citep{ProblemStatement}. Software validation checks the
+system against the user needs recorded in the Design Thinking Report. The
+Performance Report measures model size, token throughput, latency, and
+reassignment time beyond the SRS targets, starting from the results of the
+performance tests in this plan.
 
 \subsection{Relevant Documentation}
 
-\wss{Reference relevant documentation.  This will definitely include your SRS
-  and your other project documents (design documents, like MG, MIS, etc).  You
-  can include these even before they are written, since by the time the project
-  is done, they will be written.  You can create BibTeX entries for your
-  documents and within those entries include a hyperlink to the documents.}
+Every system test traces to a requirement in the SRS \citep{SRS}, which also
+defines the symbolic constants used here. The Hazard Analysis
+\citep{HazardAnalysis} produced the safety requirements SR0-1 to SR5-2, and
+each has at least one test. Five of its 12 failure modes are in communication
+between nodes, so most of our fault-injection tests target that
+area.
 
-\citet{SRS}
-
-\wss{Don't just list the other documents.  You should explain why they are relevant and 
-how they relate to your VnV efforts.}
+The Development Plan \citep{DevelopmentPlan} sets the linters, test frameworks,
+and continuous integration pipeline our automated tests use. Unit tests will be written against the
+Module Guide \citep{MG} and Module Interface Specification \citep{MIS} once
+they exist.
 
 \section{Plan}
 
-\wss{Introduce this section.  You can provide a roadmap of the sections to
-  come.}
+The following is a set of verification practices that the \progname{} team will use to ensure that
+requirements, design, implementation, and testing are each verified throughout the development process.
+
+\hyperref[sec:VnVTeam]{3.1} begins by establishing team roles specifically for project verification. Following this,
+\hyperref[sec:SRSVer]{3.2}, \hyperref[sec:DesignVer]{3.3}, and \hyperref[sec:VnVVer]{3.4} specify how the team will verify
+various non-code artifacts - the \citet{SRS}, design, and the verification and validation plan (this document).
+
+Finally, \hyperref[sec:ImpVer]{3.5} - Implementation Verification, \hyperref[sec:AutoTestVer]{3.6} - Automated Testing and
+Verification Tools, and \hyperref[sec:SoftVal]{3.7} - Software Validation provide further specification on how code artifacts
+will be validated and verified.
 
 \subsection{Verification and Validation Team}
+\label{sec:VnVTeam}
 
-\wss{Your teammates.  Maybe your supervisor.
-  You should do more than list names.  You should say what each person's role is
-  for the project's verification.  A table is a good way to summarize this information.}
+The team will take on overall responsibility for the execution of Verification and Validation, based on the following
+roles and responsibilities.
+
+\begin{table}[H]
+\centering
+\caption{\progname{} Verification and Validation Team}
+\label{tab:alternatives}
+\begin{tabular}{| p{3.75cm} | p{3.75cm} | p{6.5cm} |}
+\hline
+\textbf{Team Member} & \textbf{Role} & \textbf{Verification and Validation Responsibilities} \\
+\hline
+Gary Qin & Lead & Oversight of the execution of the plan. Responsible for promoting changes brought forth by R\&D, ensuring new tools are implemented, and that automated
+verification and pipeline tools are operating as intended. \\
+\hline
+Jinwoo Hong & Research \& Development & Research of state of the art verification/validation tooling and providing recommendations to the team.
+If required, small-scale integration of new validation tools for demonstration purposes and to prove effectiveness. \\
+\hline
+Matthew Nesbitt & DevOps \& CI-CD & Integration of identified tools and practices into the project's pipeline, ensuring that all code and documentation changes
+are checked automatically for adherence. Repair and fixes to CI-CD as required. \\
+\hline
+Colin Chambachan & Implementation & Working with Coordinator and Research \& Development team members to implement tools and practices in the codebase. This
+applies for document- and code-based verification and validation. \\
+\hline
+Ethan Walsh & Coordinator & Ensuring that each component of the plan has been executed to the team's quality standard. 
+Additionally, tracking updates to plan and updating documentation to reflect what is up-to-date. \\
+\hline
+\end{tabular}
+\end{table}
 
 \subsection{SRS Verification}
+\label{sec:SRSVer}
 
-\wss{List any approaches you intend to use for SRS verification.  This may
-  include ad hoc feedback from reviewers, like your classmates (like your
-  primary reviewer), or you may plan for something more rigorous/systematic.}
+In order to ensure that the SRS meets expectations, and that the project meets what was originally set out in the SRS,
+the following verification methods will be used:
 
-\wss{If you have a supervisor for the project, you shouldn't just say they will
-read over the SRS.  You should explain your structured approach to the review.
-Will you have a meeting?  What will you present?  What questions will you ask?
-Will you give them instructions for a task-based inspection?  Will you use your
-issue tracker?}
+\begin{itemize}
+  \item \textbf{External Peer Review}: Since the team aims to validate their project externally and \progname{} has no designated supervisor, the team will seek
+  external feedback from a peer who is not a member of the Capstone course. This peer should be familiar with the project and its goals at a high-level, 
+  possess relevant background knowledge, and can perform an ad-hoc review. This allows the team to surface new insights and improve the readability and quality of their SRS.
+  \item \textbf{Internal Peer Review}: As with each document in the Capstone project, there is a review process performed by another team.
+  This review aims to find consistency and content issues within the document, and will be used to provide the team additional feedback.
+  \item \textbf{GitHub Issue Tracking}: All feedback provided to the team will be noted and converted into issues on GitHub. This allows the team to maintain a backlog
+  of SRS-related issues and fix identified problems.
+  \item \textbf{Internal Team Verification} (Once per deliverable): As the team progresses through the term, they will review their
+  progress to ensure it aligns with what was set out in the SRS document. In the case new code or documentation does not align
+  with the SRS, the team will discuss the necessary fix. This will result in either the SRS being amended to reflect the project more accurately,
+  or the deliverable will be changed. The goal of this process is to guarantee consistency: what is stated in any code or documentation after the SRS
+  should logically follow from what was prescribed in it.
+  \item \textbf{SRS Checklist}: In order to complete internal team verification, the lead for verification and validation (as set out in \hyperref[sec:VnVTeam]{3.1}) will
+  create a checklist of criteria. This checklist will be used by the team to ensure each deliverable logically follows from the SRS, and if not, the necessary changes have 
+  been completed and tracked sufficiently.
 
-\wss{Maybe create an SRS checklist?}
+\end{itemize}
 
 \subsection{Design Verification}
+\label{sec:DesignVer}
 
-\wss{Plans for design verification}
+Design verification of Lake will begin after November 16, when the first design document will be complete. In order to verify the design of Lake, the following methods will be used:
 
-\wss{The review will include reviews by your classmates}
+\begin{itemize}
+  \item \textbf{Peer Review}: Similar to verification of the SRS that was detailed in \hyperref[sec:SRSVer]{3.2}, peer review will be used to verify the design documentation.
+  This will involve the traditional peer review process from another Capstone team, along with external review. External review will be used as a method to challenge the team's assumptions
+  and point out potential design flaws.
+  \item \textbf{Inspection of Module Guide and Module Interface Specification}: After the document has been completed, the team will perform a review of the design documentation.
+  This will be used to identify inconsistencies, gaps between design and requirements, and flag areas of concern. Any areas of concern should be noted as GitHub issues and resolved prior to further design work.
+  \item \textbf{Checklist-based Verification}: The team will combine results of the peer review along with an existing checklist to complete the design verification process. The checklist will focus on the following:
+    \begin{itemize}
+      \item Adherence to general software design principles and practices (e.g., \hyperref[SOLID]{SOLID})
+      \item Adherence to modular design principles (minimal effort to build additional features)
+      \item Consideration for design scaling and performance-oriented non-functional requirements (ability to scale and expand the design to accommodate additional requests, devices, and traffic).
+    \end{itemize}
+\end{itemize}
 
-\wss{Create a checklists?}
 
 \subsection{Verification and Validation Plan Verification}
+\label{sec:VnVVer}
 
-\wss{The verification and validation plan is an artifact that should also be
-verified.  Techniques for this include review and mutation testing.}
+In order to verify the quality of the team's verification and validation plan, the team will employ the following methods:
 
-\wss{The review will include reviews by your classmates}
-
-\wss{Create a checklists?}
+\begin{itemize}
+  \item \textbf{Internal Review}: Throughout the preparation of the document, the team will review individual document sections and how they connect to guarantee quality and consistency.
+  \item \textbf{Peer Review}: The team will use the peer review process to catch additional issues or inconsistencies. This will be used to complement the completed internal review.
+  \item \textbf{Ad-Hoc Team Meeting}: The team will schedule a one-time meeting after the delivery of the VnV plan to assess its feasibility, as well as assign responsibilities to each member.
+  This meeting will aim to assess the effectiveness and practicality of the current plan, and make changes if required.
+\end{itemize}
 
 \subsection{Implementation Verification}
+\label{sec:ImpVer}
+The implementation will utilize a combination of code review, tests, benchmarks, and issue tracking methods to verify correctness and performance in an organized and auditable manner.
+\begin{itemize}
+  \item \textbf{Code review:}
+  GitHub pull requests will be created for code review following the Development Plan's process of approving code changes. At least two reviewers will check for correctness, error handling, and adequate tests for the code changes. A max of 400 lines added per pull request constraint is added to ensure each pull request is auditable for reviewers, with larger features split into several pull requests.
 
-\wss{You should at least point to the tests listed in this document and the unit
-  testing plan.}
+  \item \textbf{Unit and integration tests:}
+  Unit tests will be used to ensure correctness in areas such as model layer allocation constraints, lifecycle transitions of node health, and message format validation to ensure compatibility with interfaces (e.g., the OpenAI API spec). Integration tests will be used to validate runtime behavior of running multiple node processes on a single machine with a small model to ensure functional end to end behavior. Both checks will run in the CI using GitHub runners, configured such that the relevant tests respective to the code changes are run.
 
-\wss{In this section you would also give any details of any plans for static
-  verification of the implementation.  Potential techniques include code
-  walkthroughs, code inspection, static analyzers, etc.}
+  \item \textbf{Fault Handling:}
+  Tests will introduce faults in lifecycle and data states to inject stale health data, unavailable nodes, corrupted or incomplete tensor messages, and communication delays. The results will be checked against the defined safety requirements in bounded recovery, explicit failures, and filtration of sensitive data in diagnostic logs.
 
-\wss{The final class presentation in CAS 741 could be used as a code
-walkthrough.  There is also a possibility of using the final presentation (in
-CAS741) for a partial usability survey.}
+  \item \textbf{System Testing:}
+  Tests for Lake's end-to-end behavior that may require multiple devices, various supported GPU backends and operating systems, and varying degrees of system capabilities will be run on team hardware before major releases or demonstrations. System test coverage will identify the operating system, CPU architecture, GPU backends, and system capability metrics (RAM/VRAM, CPU/GPU performance). Combinations of system configurations and capabilities that are are not tested will be reported as untested in the V\&V report. Each recorded result will also identify the commit of the current code version, the model as well its quantization, node configuration, and test inputs for repeatability.
+
+  \item \textbf{Performance Verification:}
+  Performance metrics such as Lake's capacity for model size, concurrent request throughput, and output quality will be used to verify that optimizations result in quantitative performance gain, and that changes do not regress performance, as specified in Section 4.2.
+
+  \item \textbf{Defect Tracking:}
+  Failed CI checks will block pull requests from being merged. If review findings are too large in scope to be addressed in the pull request, they will instead be filed as GitHub issues. Regression tests will be added when a failure is identified to prevent it from recurring.
+\end{itemize}
 
 \subsection{Automated Testing and Verification Tools}
+\label{sec:AutoTestVer}
+The following testing and verification tools will be used in accordance with the technologies specified in the Development Plan.
+\begin{itemize}
+  \item \textbf{Testing frameworks:}
+  \texttt{pytest}~\citep{Pytest} will be used for Python components, \texttt{cargo test}~\citep{CargoTest} for Rust components, and \texttt{Vitest}~\citep{Vitest} for TypeScript components. Tests will cover behavior around the components of the coordinator, model partitioner, inference engine, Tensor I/O, and the Lake client.
 
-\wss{What tools are you using for automated testing.  Likely a unit testing
-  framework and maybe a profiling tool, like ValGrind.  Other possible tools
-  include a static analyzer, make, continuous integration tools, test coverage
-  tools, etc.  Explain your plans for summarizing code coverage metrics.
-  Linters are another important class of tools.  For the programming language
-  you select, you should look at the available linters.  There may also be tools
-  that verify that coding standards have been respected, like flake9 for
-  Python.}
+  \item \textbf{Static checks:}
+  \texttt{Ruff}~\citep{Ruff} will be used for Python code, \texttt{Clippy}~\citep{Clippy} and \texttt{rustfmt}~\citep{Rustfmt} will be used for Rust code, and \texttt{ESLint}~\citep{ESLint} and \texttt{Prettier}~\citep{Prettier} will be used for TypeScript code. These checks will be run on commit hooks and pull request CI.
 
-\wss{If you have already done this in the development plan, you can point to
-that document.}
+  \item \textbf{Continuous integration:}
+  GitHub Actions~\citep{GitHubActions} will be used to run checks and automated tests on Linux, Windows, and macOS runners. To minimize CI minutes, applicable tests will use lightweight models across local processes. Tests requiring specific hardware that GitHub runners do not provide will instead be run on team hardware outside of the CI.
 
-\wss{The details of this section will likely evolve as you get closer to the
-  implementation.}
+  \item \textbf{Code coverage:}
+  \texttt{pytest-cov}~\citep{PytestCov} will be used for Python code coverage, and \texttt{cargo-llvm-cov}~\citep{CargoLlvmCov} will be used for Rust code coverage. Code coverage reports will be generated that summarize which components and code are not exercised by a test suite.
+
+  \item \textbf{Memory and network checks:}
+  \texttt{AddressSanitizer}~\citep{AddressSanitizer} will be used for verifying unsafe \texttt{ggml}~\citep{Ggml} integrations. \texttt{tc netem}~\citep{TcNetem} on Linux will be used for packet loss and delays as specified in Section 4.2.
+
+  \item \textbf{Performance comparisons:}
+  Scripts will be used to measure concurrent request throughput, as well as compare model accuracy scores against the same model served by \texttt{llama-server}~\citep{LlamaCpp} as defined in Section 4.2.
+\end{itemize}
 
 \subsection{Software Validation}
+\label{sec:SoftVal}
+Software validation assesses if Lake meets the needs described by the SRS goals, stakeholder interview, and user profiles. In addition to checking these requirements, the team will gather feedback on whether the workflow and user experience are useful and intuitive.
+\begin{itemize}
+  \item \textbf{Task-based user sessions:}
+  Participants who have not used Lake, such as other students outside of the capstone team, will complete tasks to set up and utilize the Lake network as specified in Section 6.2. These sessions will utilize the participant count and time limits specified in Section 6.1. With the data recorded from these sessions, the team will gauge whether users can correctly and easily configure Lake and understand how participating devices work, as well as determine the throughput and bottlenecks of the system.
 
-\wss{If there is any external data that can be used for validation, you should
-  point to it here.  If there are no plans for validation, you should state that
-  here.}
+  \item \textbf{Demonstrations of benefits:}
+  During the PoC and revision 0 demonstration, the team will demonstrate the functionality of Lake at its current stage to collect feedback on its usefulness and benefits. Demonstrations will show a client that is connected to the Lake API to access a model via a pooled device network, and measurements across concurrent requests, model capacity, and output quality will be made, corresponding to the tests in Section 4. Participants of the Lake network at this stage can also comment on if the response times and token throughput of the model are acceptable for their use case.
 
-\wss{You might want to use review sessions with the stakeholder to check that
-the requirements document captures the right requirements.  Maybe task based
-inspection?}
+  \item \textbf{Stakeholder interview:}
+  Subject to availability of the previously interviewed AI developer from the SRS, the team will seek follow-up feedback. The follow-up will involve the ergonomics of integrating Lake into the company's workflow, the implementation of the security and telemetry requirements, and any limitations that would prevent operation at their company.
 
-\wss{For those capstone teams with an external supervisor, the Rev 0 demo should 
-be used as an opportunity to validate the requirements.  You should plan on 
-demonstrating your project to your supervisor shortly after the scheduled Rev 0 demo.  
-The feedback from your supervisor will be very useful for improving your project.}
-
-\wss{For teams without an external supervisor, user testing can serve the same purpose 
-as a Rev 0 demo for the supervisor.}
-
-\wss{This section might reference back to the SRS verification section.}
+\end{itemize}
+Feedback from the software validation will be recorded as GitHub issues and used to iterate on the implementation or revise requirements.
 
 \section{System Tests}
 
@@ -1293,6 +1392,10 @@ inconsistencies.}
 
 \wss{For each of the uses, identify which parts of the document were affected.}
 
+ChatGPT was used to brainstorm and research ideas and tools alongside course material for Section 3.5, 3.6, 3.7. It was also used for adding template/placeholder LaTeX code as well as a final grammar check.
+
+ChatGPT was also used for the appendix for template/placeholder LaTeX code and a final grammar check.
+
 \wss{You do not need to report every interaction, but you should disclose the 
 uses that materially contributed to your work}
 
@@ -1317,26 +1420,97 @@ whether material was generated by a human or an AI system.}
 
 \section{Appendix --- Reflection}
 
-\wss{This section is not required for CAS 741}
-
-The information in this section will be used to evaluate the team members on the
-graduate attribute of Lifelong Learning.
-
 \input{../Reflection.text}
 
 \begin{enumerate}
-  \item What went well while writing this deliverable? 
+  \item What went well while writing this deliverable?
+
+Our SRS and Hazard Analysis documents that identified several functional, non-functional, and safety requirements gave us a good starting point for defining the test plan. We used these documents to work from a specific requirement to an input to a test, an expected result, and a method to check that result, without having the need to come up with a general list of tests beforehand. For example, the requirements for stale health data and bounded recovery were used to specify tests for ensuring correctness during delayed health reports or a follower node getting interrupted.
+
+We also divided the document by responsibility to improve parallelism and reduce blockers while our team worked. Dividing the document and reviewing things together was important as the verification plan, test cases, traceability tables and symbolic parameters all described related activities, just from different perspectives.
+
+Compared to the SRS and Hazard Analysis documents, we clarified which members owned the sections earlier, as well as thoroughly reviewed and discussed the drafts and pull requests before merging. This helped align the different parts of the V\&V, such as test cases and symbolic parameters before merging them together.
   \item What pain points did you experience during this deliverable, and how
     did you resolve them?
+
+A difficult part of the deliverable was planning the tests for the distributed behavior of Lake (i.e. testing how Lake behaves across computers with different system configurations and hardware capabilities), before the implementation and hardware behaviour were available. We addressed this by separating lightweight automated CI tests from hardware and system tests we would run on our own hardware.
+
   \item What knowledge and skills will the team collectively need to acquire to
   successfully complete the verification and validation of your project?
   Examples of possible knowledge and skills include dynamic testing knowledge,
   static testing knowledge, specific tool usage, Valgrind etc.  You should look to
   identify at least one item for each team member.
+
+  \begin{itemize}
+    \item \textbf{Jinwoo Hong:}
+  Evaluating coverage and memory-checking tools for Rust, especially for areas involving ggml through an unsafe foreign function interface. This is important for testing as it requires figuring out what can and cannot be determined correctness-wise in this area.
+    \item \textbf{Gary Qin:}
+  Designing experiments to determine model capacity, max concurrent requests, and output quality and compare with past baselines, while also configuring various model settings and device configurations.
+    \item \textbf{Matthew Nesbitt:}
+  Building CI workflows across Linux, Windows, and macOS operating systems, while separating automated CI tests from those that require real manual hardware configurations.
+    \item \textbf{Colin Chambachan:}
+  Implementing various fixtures and fault injection tests that can reproduce failures in the distributed system while keeping these tests automated in the CI.
+    \item \textbf{Ethan Walsh:}
+  Ensuring tests are traceable to requirements and being able to audit and inspect missed acceptance criteria, infeasible tests, and any other changes that require tests to be updated.
+  \end{itemize}
+
   \item For each of the knowledge areas and skills identified in the previous
   question, what are at least two approaches to acquiring the knowledge or
   mastering the skill?  Of the identified approaches, which will each team
   member pursue, and why did they make this choice?
+
+  \begin{itemize}
+    \item \textbf{Jinwoo Hong:}
+    \begin{itemize}
+      \item \textbf{Approach 1:}
+      Study the documentation for how to utilize the coverage and memory checking tools for Rust. Read \href{https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html}{Section 20.1 of the Rust Book} to learn about calling C functions and creating safe abstractions around unsafe Rust.
+      \item \textbf{Approach 2:}
+      Compare and learn the tools by working on a small example of both Rust and C communicating.
+      \item \textbf{Chosen approach and reason:}
+      The best approach combines both, focusing on reading documentation and also trying a small implementation to get a better understanding of potential difficulties when implementing with these tools.
+    \end{itemize}
+
+    \item \textbf{Gary Qin:}
+    \begin{itemize}
+      \item \textbf{Approach 1:}
+      Review how existing benchmarks work for evaluating LLMs (e.g., MMLU) and study their methodologies.
+      \item \textbf{Approach 2:}
+      Build a small experiment that varies one factor at a time to easily determine how different changes affect end results.
+      \item \textbf{Chosen approach and reason:}
+      The proposed approach was to run a small experiment supported by documentation and methods used in other benchmarks. This can reveal which configurations cause unstable results before full hardware runs.
+    \end{itemize}
+
+    \item \textbf{Matthew Nesbitt:}
+    \begin{itemize}
+      \item \textbf{Approach 1:}
+      Study the documentation for GitHub Actions and how Rust and Python workflows work across Linux, Windows, and macOS, focusing on areas such as dependency installation, caching, and retaining test reports so that failed runs can be investigated.
+      \item \textbf{Approach 2:}
+      Build a small workflow that compiles a component and runs a test on it on one operating system. Also introduce a failing test to see how the error information can be retrieved.
+      \item \textbf{Chosen approach and reason:}
+      The second approach was chosen because it allows for incrementally understanding and building the CI workflows. Once small components are built, they can be extended to the other operating systems to check platform-specific build and test behaviour.
+    \end{itemize}
+
+    \item \textbf{Colin Chambachan:}
+    \begin{itemize}
+      \item \textbf{Approach 1:}
+      Review various examples of test fixtures, test doubles, and any course content from SFWRENG 3S03 that may be relevant for this area.
+      \item \textbf{Approach 2:}
+      Implement a small test for fault injection, such as withholding a node's health reports until they become stale, and ensuring the system behaves correctly according to the relevant requirements.
+      \item \textbf{Chosen approach and reason:}
+      Approach 1 should be a prerequisite if knowledge on the material is insufficient, otherwise approach 2 was chosen as it allows for more incremental improvements and understanding of the system and tests.
+    \end{itemize}
+
+    \item \textbf{Ethan Walsh:}
+    \begin{itemize}
+      \item \textbf{Approach 1:}
+      Review the course V\&V checklist and the team's traceability table to learn how to identify and interpret missing tests or unclear results.
+      \item \textbf{Approach 2:}
+      Review some requirements and tests with a teammate then compare each other's findings about any missing cases or infeasible test procedures.
+      \item \textbf{Chosen approach and reason:}
+      Assuming familiarity with the course material, the second approach was chosen for helping ensure there are no overlooked results, and that it better applies to Lake's use-case.
+    \end{itemize}
+
+  \end{itemize}
 \end{enumerate}
 
 \end{document}
