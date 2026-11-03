@@ -396,7 +396,7 @@ Feedback from the software validation will be recorded as GitHub issues and used
 \section{System Tests}
 
 This section contains system-level tests to comprehensively validate all functional and non-functional
-requirements from the Lake SRS. These tests are intended to be run once the Lake system is complete, using
+requirements from the Lake SRS, and the safety requirements from the Hazard Analysis. These tests are intended to be run once the Lake system is complete, using
 a variety of models and devices to simulate real-world use.
 
 \subsection{Tests for Functional Requirements}\label{sec:fr-tests}
@@ -413,7 +413,8 @@ they verify to ensure full coverage of all SRS S.2 functional requirements with 
 
 \noindent Unless otherwise stated, the following can be assumed for all tests in \autoref{sec:fr-tests}:
 \begin{itemize}
-	\item The model loaded in testing is a \glink{gguf}{GGUF} file containing SmolLM2-135M-Instruct, Q8\_0 (~150Mb).
+	\item The model loaded in testing is \textit{SMALL\_MODEL}, a \glink{gguf}{GGUF} file defined in
+		Section~\ref{sec:symbolic-parameters}.
 	\item Multiple nodes are simulated using multiple processes on the same machine.
 	\item Network connections are simulated between processes using the loopback interface.
 	\item Network throttling/instability will be simulated using tc netem \citep{TcNetem}.
@@ -425,155 +426,125 @@ they verify to ensure full coverage of all SRS S.2 functional requirements with 
 \subsubsection{Coordinator (S.2.1)}
 \begin{enumerate}
 	\item{T.FR.CRD.1}\label{T.FR.CRD.1} \\
-		\textbf{Control}: Automatic \\
-		\textbf{Initial State}: Lake loaded on \textit{MIN\_DEVICES} devices. \\
-		\textbf{Input}: On the leader device, invite the other device to be part
+		Control: Automatic \\
+		Initial State: Lake loaded on \textit{MIN\_NODES} devices. \\
+		Input: On the leader device, invite the other device to be part
 		of a cluster. On each other device, accept the request. \\
-		\textbf{Output}: Both devices report being in the network, and report being
+		Output: Both devices report being in the network, and report being
 		ready to load a model. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.1.4}, \textit{FR.S.1.5}, \textit{FR.S.1.15},
+		Derivation: Verifies \textit{FR.S.1.4}, \textit{FR.S.1.5}, \textit{FR.S.1.15},
 		\textit{FR.S.1.17}, \textit{FR.S.1.18}, \textit{FR.S.1.20}, \textit{FR.S.1.21},
 		\textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.7}, \textit{FR.S.1.16}, \textit{FR.S.4.1}.
 	\item{T.FR.CRD.2}\label{T.FR.CRD.2} \\
-		\textbf{Control}: Automatic \\
-		\textbf{Initial State}: Lake network created with \textit{MIN\_DEVICES} devices. \\
-		\textbf{Input}: Load \glink{gguf}{GGUF} file into network. \\
-		\textbf{Output}: All devices report successful loading, and report ready for inference. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.1.1}, \textit{FR.S.1.6}, \textit{FR.S.1.8},
+		Control: Automatic \\
+		Initial State: Lake network created with \textit{MIN\_NODES} devices. \\
+		Input: Load \glink{gguf}{GGUF} file into network. \\
+		Output: All devices report successful loading, and report ready for inference. \\
+		Derivation: Verifies \textit{FR.S.1.1}, \textit{FR.S.1.6}, \textit{FR.S.1.8},
 		\textit{FR.S.1.19}, \textit{FR.S.3.1}.
 	\item{T.FR.CRD.3}\label{T.FR.CRD.3} \\
-		\textbf{Control}: Automatic \\
-		\textbf{Initial State}: Model loaded and serving requests in Lake network with \textit{MIN\_DEVICES}
+		Control: Automatic \\
+		Initial State: Model loaded and serving requests in Lake network with \textit{MIN\_NODES}
 		devices. \\
-		\textbf{Input}: Reduce the throughput of a follower node below \textit{FAIL\_THRESHOLD}. \\
-		\textbf{Output}: The Lake network rebuilds and redistributes the model across the nodes,
+		Input: Reduce the throughput of a follower node below \textit{FAIL\_THRESHOLD}. \\
+		Output: The Lake network rebuilds and redistributes the model across the nodes,
 		excluding the modified node.
 		Any in-progress requests are retried, and the network begins accepting new requests. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.1.7}, \textit{FR.S.1.10}, \textit{FR.S.1.11},
+		Derivation: Verifies \textit{FR.S.1.7}, \textit{FR.S.1.10}, \textit{FR.S.1.11},
 		\textit{FR.S.1.13}, \textit{FR.S.1.22}, \textit{FR.S.1.23}, \textit{FR.S.1.2},
 		\textit{FR.S.1.3}, \textit{FR.S.3.4}, \textit{FR.S.4.5}.
 	\item{T.FR.CRD.4}\label{T.FR.CRD.4} \\
-		\textbf{Control}: Automatic \\
-		\textbf{Initial State}: Model loaded and serving requests in Lake network with \textit{MIN\_DEVICES}
+		Control: Automatic \\
+		Initial State: Model loaded and serving requests in Lake network with \textit{MIN\_NODES}
 		devices. \\
-		\textbf{Input}: Add a new device to the Lake network. \\
-		\textbf{Output}: The Lake network rebuilds and redistributes the model across the nodes,
+		Input: Add a new device to the Lake network. \\
+		Output: The Lake network rebuilds and redistributes the model across the nodes,
 		including the newly added node. Any in-progress requests are retried, and the network begins
 		accepting new requests.\\
-		\textbf{Derivation}: Verifies \textit{FR.S.1.12}, \textit{FR.S.1.13}.
+		Derivation: Verifies \textit{FR.S.1.12}, \textit{FR.S.1.13}.
 	\item{T.FR.CRD.5}\label{T.FR.CRD.5} \\
-		\textbf{Control}: Automatic \\
-		\textbf{Initial State}: Model loaded in Lake network with \textit{MIN\_DEVICES} devices. \\
-		\textbf{Input}: Leader node is killed. \\
-		\textbf{Output}: After \textit{LEADER\_TIMEOUT}, the Lake network disbands and each
+		Control: Automatic \\
+		Initial State: Model loaded in Lake network with \textit{MIN\_NODES} devices. \\
+		Input: Leader node is killed. \\
+		Output: After \textit{LEADER\_TIMEOUT}, the Lake network disbands and each
 		follower node unloads its model partition. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.1.24}, \textit{FR.S.1.25}.
+		Derivation: Verifies \textit{FR.S.1.24}, \textit{FR.S.1.25}, \textit{SR4-2}.
 \end{enumerate}
 \subsubsection{Model Partitioner (S.2.2)}
 \begin{enumerate}
 	\item{T.FR.MP.1}\label{T.FR.MP.1} \\
-		\textbf{Control}: Automatic \\
-		\textbf{Initial State}: Lake network created with \textit{MIN\_DEVICES} devices. \\
-		\textbf{Input}: Load \glink{gguf}{GGUF} file into network. \\
-		\textbf{Output}: All devices report Lake's \glink{gpu}{GPU}-accessible memory usage of not more
-		than: $total - \textit{MEMORY\_MARGIN}$. The ratio of the usage of
+		Control: Automatic \\
+		Initial State: Lake network created with \textit{MIN\_NODES} devices. \\
+		Input: Load \glink{gguf}{GGUF} file into network. \\
+		Output: Each device $i$ reports Lake's \glink{gpu}{GPU}-accessible memory usage of not more
+		than $M_i(1 - \textit{MEMORY\_MARGIN})$, where $M_i$ is the device's free
+		\glink{gpu}{GPU}-accessible memory before loading. The ratio of the usage of
 		\glink{gpu}{GPU}-accessible memory between devices is proportional to device capabilities. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.2.1}, \textit{FR.S.2.4}, \textit{FR.S.1.8}.
+		Derivation: Verifies \textit{FR.S.2.1}, \textit{FR.S.2.4}, \textit{FR.S.1.8}.
 	\item{T.FR.MP.2}\label{T.FR.MP.2} \\
-		\textbf{Control}: Automatic \\
-		\textbf{Initial State}: Lake network created with \textit{MIN\_DEVICES} devices. \\
-		\textbf{Input}: Load \glink{gguf}{GGUF} file where $kv\_cache\_size + model\_size +
-		(n\_nodes\times\textit{MEMORY\_MARGIN})$ is larger
-		than the network's sum of memory. \\
-		\textbf{Output}: Leader node reports that there is no valid partition across the network. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.2.2}.
+		Control: Automatic \\
+		Initial State: Lake network created with \textit{MIN\_NODES} devices. \\
+		Input: Load a \glink{gguf}{GGUF} file where $S_{\mathrm{model}} + S_{\mathrm{KV}} >
+		(1 - \textit{MEMORY\_MARGIN})\sum_i M_i$, where $S_{\mathrm{model}}$ is the size of the
+		model weights, $S_{\mathrm{KV}}$ the size of the KV cache for \textit{CONTEXT\_MAX} tokens, and
+		$M_i$ the free \glink{gpu}{GPU}-accessible memory of device $i$. \\
+		Output: Leader node reports that there is no valid partition across the network. \\
+		Derivation: Verifies \textit{FR.S.2.2}.
 \end{enumerate}
 \subsubsection{Inference Engine (S.2.3)}
 \begin{enumerate}
 	\item{T.FR.IE.1}\label{T.FR.IE.1} \\
-		\textbf{Control}: Automatic \\
-		\textbf{Initial State}: Lake network created and model file loaded with \textit{MIN\_DEVICES} devices. \\
-		\textbf{Input}: Send inference request to OpenAI compatible API. \\
-		\textbf{Output}: Network outputs model response via OpenAI compatible API. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.3.2}, \textit{FR.S.3.3}, \textit{FR.S.4.3}, \textit{FR.S.4.4},
+		Control: Automatic \\
+		Initial State: Lake network created and model file loaded with \textit{MIN\_NODES} devices. \\
+		Input: Send inference request to OpenAI compatible API. \\
+		Output: Network outputs model response via OpenAI compatible API. \\
+		Derivation: Verifies \textit{FR.S.3.2}, \textit{FR.S.3.3}, \textit{FR.S.4.3}, \textit{FR.S.4.4},
 		\textit{FR.S.1.9}.
 	\item{T.FR.IE.2}\label{T.FR.IE.2} \\
-		\textbf{Control}: Automatic \\
-		\textbf{Initial State}: Lake network created and model file loaded with \textit{MIN\_DEVICES} devices. \\
-		\textbf{Input}: Send concurrent inference requests to OpenAI compatible API. \\
-		\textbf{Output}: Network outputs model responses concurrently via OpenAI compatible API. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.3.5}, \textit{FR.S.4.6}, \textit{FR.S.1.14}.
+		Control: Automatic \\
+		Initial State: Lake network created and model file loaded with \textit{MIN\_NODES} devices. \\
+		Input: Send concurrent inference requests to OpenAI compatible API. \\
+		Output: Network outputs model responses concurrently via OpenAI compatible API. \\
+		Derivation: Verifies \textit{FR.S.3.5}, \textit{FR.S.4.6}, \textit{FR.S.1.14}.
 \end{enumerate}
 \subsubsection{Tensor I/O (S.2.4)}
 \begin{enumerate}
 	\item{T.FR.TIO.1}\label{T.FR.TIO.1} \\
-		\textbf{Control}: Manual \\
-		\textbf{Initial State}: Lake network created and serving requests with \textit{MIN\_DEVICES} devices. \\
-		\textbf{Input}: Reduce the throughput of a connection between nodes by \textit{THROUGHPUT\_REDUCTION}. \\
-		\textbf{Output}: Token throughput initially drops, then \glink{cpu}{CPU} usage increases on both the
+		Control: Manual \\
+		Initial State: Lake network created and serving requests with \textit{MIN\_NODES} devices. \\
+		Input: Reduce the throughput of a connection between nodes by \textit{THROUGHPUT\_REDUCTION}. \\
+		Output: Token throughput initially drops, then \glink{cpu}{CPU} usage increases on both the
 		sending and receiving devices due to increasing compression. Throughput then increases. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.4.2}.
+		Derivation: Verifies \textit{FR.S.4.2}.
 \end{enumerate}
 \subsubsection{Lake Client (S.2.5)}\label{subsec:lake-client-system-tests}
 \begin{enumerate}
 	\item{T.FR.LCLI.1}\label{T.FR.LCLI.1} \\
-		\textbf{Control}: Manual \\
-		\textbf{Initial State}: Lake running on \textit{MIN\_DEVICES} devices on the same network. \\
-		\textbf{Input}: User scans for devices, selects the desired devices, and creates a network with them.
+		Control: Manual \\
+		Initial State: Lake running on \textit{MIN\_NODES} devices on the same network. \\
+		Input: User scans for devices, selects the desired devices, and creates a network with them.
 		The user then accepts the join requests on each device's Lake Client. \\
-		\textbf{Output}: All devices report successfully forming a network. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.3}, \textit{FR.S.5.7}.
+		Output: All devices report successfully forming a network. \\
+		Derivation: Verifies \textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.3}, \textit{FR.S.5.7}.
 	\item{T.FR.LCLI.2}\label{T.FR.LCLI.2} \\
-		\textbf{Control}: Manual \\
-		\textbf{Initial State}: Lake running and model loaded on \textit{MIN\_DEVICES} on the same network. \\
-		\textbf{Input}: Inference request is issued through the OpenAI compatible API. \\
-		\textbf{Output}: Performance metrics for the network and each node are displayed by
+		Control: Manual \\
+		Initial State: Lake running and model loaded on \textit{MIN\_NODES} devices on the same network. \\
+		Input: Inference request is issued through the OpenAI compatible API. \\
+		Output: Performance metrics for the network and each node are displayed by
 		the Lake Client. The weakest links in the system forming bottlenecks are highlighted by the Lake Client. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.5.5}, \textit{FR.S.5.6}.
+		Derivation: Verifies \textit{FR.S.5.5}, \textit{FR.S.5.6}.
 	\item{T.FR.LCLI.3}\label{T.FR.LCLI.3} \\
-		\textbf{Control}: Manual \\
-		\textbf{Initial State}: Lake network created with \textit{MIN\_DEVICES} devices. \\
-		\textbf{Input}: Load \glink{gguf}{GGUF} file where $kv\_cache\_size + model\_size +
-		(n\_nodes\times\textit{MEMORY\_MARGIN})$ is larger
-		than the network's sum of memory. \\
-		\textbf{Output}: Lake Client reports that there is no valid partition across the network. \\
-		\textbf{Derivation}: Verifies \textit{FR.S.5.4}.
+		Control: Manual \\
+		Initial State: Lake network created with \textit{MIN\_NODES} devices. \\
+		Input: Load a \glink{gguf}{GGUF} file where $S_{\mathrm{model}} + S_{\mathrm{KV}} >
+		(1 - \textit{MEMORY\_MARGIN})\sum_i M_i$, where $S_{\mathrm{model}}$ is the size of the
+		model weights, $S_{\mathrm{KV}}$ the size of the KV cache for \textit{CONTEXT\_MAX} tokens, and
+		$M_i$ the free \glink{gpu}{GPU}-accessible memory of device $i$. \\
+		Output: Lake Client reports that there is no valid partition across the network. \\
+		Derivation: Verifies \textit{FR.S.5.4}.
 \end{enumerate}
 
-Table~\ref{tab:trace-fr} lists the system tests that verify each functional requirement.
-Every functional requirement is supported by at least one system test, with the exceptions
-listed at the start of \autoref{sec:fr-tests}.
 
-\begin{table}[H]
-\centering
-\caption{Traceability of system tests to functional requirements}
-\label{tab:trace-fr}
-\begin{tabularx}{\textwidth}{lX}
-\toprule
-\textbf{Test Case ID} & \textbf{Requirements Verified} \\
-\midrule
-\hyperref[T.FR.CRD.1]{T.FR.CRD.1} & \textit{FR.S.1.4}, \textit{FR.S.1.5}, \textit{FR.S.1.15},
-		\textit{FR.S.1.17}, \textit{FR.S.1.18}, \textit{FR.S.1.20}, \textit{FR.S.1.21},
-		\textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.7}, \textit{FR.S.1.16}, \textit{FR.S.4.1} \\
-\hyperref[T.FR.CRD.2]{T.FR.CRD.2} & \textit{FR.S.1.1}, \textit{FR.S.1.6}, \textit{FR.S.1.8},
-		\textit{FR.S.1.19}, \textit{FR.S.3.1} \\
-\hyperref[T.FR.CRD.3]{T.FR.CRD.3} & \textit{FR.S.1.7}, \textit{FR.S.1.10}, \textit{FR.S.1.11},
-		\textit{FR.S.1.13}, \textit{FR.S.1.22}, \textit{FR.S.1.23}, \textit{FR.S.1.2},
-		\textit{FR.S.1.3}, \textit{FR.S.3.4}, \textit{FR.S.4.5} \\
-\hyperref[T.FR.CRD.4]{T.FR.CRD.4} & \textit{FR.S.1.12}, \textit{FR.S.1.13} \\
-\hyperref[T.FR.CRD.5]{T.FR.CRD.5} & \textit{FR.S.1.24}, \textit{FR.S.1.25} \\
-\hyperref[T.FR.MP.1]{T.FR.MP.1} & \textit{FR.S.2.1}, \textit{FR.S.2.4}, \textit{FR.S.1.8} \\
-\hyperref[T.FR.MP.2]{T.FR.MP.2} & \textit{FR.S.2.2} \\
-\hyperref[T.FR.IE.1]{T.FR.IE.1} & \textit{FR.S.3.2}, \textit{FR.S.3.3}, \textit{FR.S.4.3}, \textit{FR.S.4.4},
-		\textit{FR.S.1.9} \\
-\hyperref[T.FR.IE.2]{T.FR.IE.2} & \textit{FR.S.3.5}, \textit{FR.S.4.6}, \textit{FR.S.1.14} \\
-\hyperref[T.FR.TIO.1]{T.FR.TIO.1} & \textit{FR.S.4.2} \\
-\hyperref[T.FR.LCLI.1]{T.FR.LCLI.1} & \textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.3}, \textit{FR.S.5.7} \\
-\hyperref[T.FR.LCLI.2]{T.FR.LCLI.2} & \textit{FR.S.5.5}, \textit{FR.S.5.6} \\
-\hyperref[T.FR.LCLI.3]{T.FR.LCLI.3} & \textit{FR.S.5.4} \\
-\bottomrule
-\end{tabularx}
-\end{table}
 
 \subsection{Tests for Nonfunctional Requirements}
 \label{sec:nfr-tests}
@@ -587,29 +558,8 @@ NFR.E.8). The tests follow the verification groups in SRS S.8, and they are
 grouped by the same categories the SRS uses. The safety requirements are tested
 in Section~\ref{sec:sr-tests}.
 
-Each test uses one of the three test models below. All three use the Llama
-architecture, so the same code path is tested from the smallest model to the
-largest, and all three are released under the Apache 2.0 licence.
-
-\begin{table}[h]
-\centering
-\caption{Test models}
-\label{tab:test-models}
-\begin{tabularx}{\textwidth}{lXl}
-\toprule
-\textbf{Name} & \textbf{Model and use} & \textbf{Size} \\
-\midrule
-\textit{SMALL\_MODEL} & SmolLM2-135M-Instruct, Q8\_0. Continuous integration
-  and tests where answer quality does not matter. & about 150 MB \\
-\textit{DEMO\_MODEL} & SmolLM2-1.7B-Instruct, Q8\_0. Quality comparisons,
-  compatibility runs and the usability session. & about 1.8 GB \\
-\textit{CAPACITY\_MODEL} & Mistral-7B-Instruct-v0.3, at the precision chosen
-  in test \hyperref[T.NFR.PERF.1]{T.NFR.PERF.1}. & 7.7 to 14.5 GB \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-Unless a test says otherwise, generation uses \glink{greedy}{greedy decoding}, the
+Each test uses one of the three test models in
+Table~\ref{tab:test-models}. Unless a test says otherwise, generation uses \glink{greedy}{greedy decoding}, the
 \textit{TEST\_PROMPTS} fixed prompts in the test repository, and
 \textit{GEN\_TOKENS} generated tokens per prompt. Named values in italics are
 defined in Section~\ref{sec:symbolic-parameters}.
@@ -738,7 +688,7 @@ results are kept for the Performance Report.
 Type: Dynamic, automated
 
 Initial State: \textit{DEMO\_MODEL} served two ways: by llama.cpp's
-\texttt{llama-server} on one machine, and by a Lake network of \textit{TEST\_NODES} nodes.
+\texttt{llama-server} on one machine, and by a Lake network of \textit{MIN\_NODES} nodes.
 
 Input/Condition: The same \textit{BENCH\_QUESTIONS} multiple-choice questions
 from the MMLU (Massive Multitask Language Understanding) benchmark
@@ -802,7 +752,7 @@ results despite packet loss and corruption).
 
 Type: Dynamic, automated
 
-Initial State: A Lake network of \textit{TEST\_NODES} nodes on one machine, with no model loaded.
+Initial State: A Lake network of \textit{MIN\_NODES} nodes on one machine, with no model loaded.
 
 Input/Condition: Four invalid model files, each given to the Lake Client as the
 model to load:
@@ -825,7 +775,7 @@ the error returned, the nodes' logs, and that every process is still running.
 
 Type: Dynamic, automated
 
-Initial State: A Lake network of \textit{TEST\_NODES} nodes on one Linux machine running
+Initial State: A Lake network of \textit{MIN\_NODES} nodes on one Linux machine running
 \textit{SMALL\_MODEL}, with the nodes connected through the loopback interface.
 
 Input/Condition: The test prompts run once with no network impairment and
@@ -853,7 +803,7 @@ requests to third-party services).
 
 Type: Dynamic, automated
 
-Initial State: A Lake network of \textit{TEST\_NODES} nodes with \textit{SMALL\_MODEL} loaded and
+Initial State: A Lake network of \textit{MIN\_NODES} nodes with \textit{SMALL\_MODEL} loaded and
 logging at its most detailed level.
 
 Input/Condition: The test prompts, each with a unique random marker string
@@ -877,7 +827,7 @@ the run.
 
 Type: Dynamic, manual
 
-Initial State: A Lake network of \textit{TEST\_NODES} nodes on a local network, with packet capture
+Initial State: A Lake network of \textit{MIN\_NODES} nodes on a local network, with packet capture
 running on every node.
 
 Input/Condition: Leave an open session for \textit{IDLE\_TIME} with no
@@ -997,7 +947,7 @@ Type: Dynamic, automated
 Initial State: \textit{SMALL\_MODEL} on disk, with its SHA-256 checksum
 recorded.
 
-Input/Condition: A Lake network loads the model, partitions it across \textit{TEST\_NODES} nodes
+Input/Condition: A Lake network loads the model, partitions it across \textit{MIN\_NODES} nodes
 and runs the test prompts.
 
 Output/Result: The model file's SHA-256 checksum is unchanged.
@@ -1110,15 +1060,14 @@ in turn:
     \textit{HEALTH\_TTL};
   \item one follower is made to fail its health check, then made to pass it
     again;
-  \item a fourth node joins and its partition is not yet confirmed;
-  \item the leader process is killed.
+  \item a fourth node joins and its partition is not yet confirmed.
 \end{enumerate}
+Leader failure, the other case of SR4-2, is tested by
+\hyperref[T.FR.CRD.5]{T.FR.CRD.5}.
 
 Output/Result: In cases (a) and (b) the follower is marked unavailable and is not
 given new requests or partitions until it passes a health check. In case (c) no
-request is sent to the new node before its partition is confirmed. In case (d)
-every follower detects the leader's failure within \textit{LEADER\_TIMEOUT}
-and shuts down.
+request is sent to the new node before its partition is confirmed.
 
 How test will be performed: Part of the integration tests run in continuous
 integration. The fault-injection option holds back health reports and fails health
@@ -1130,7 +1079,7 @@ to.
 
 Type: Dynamic, automated
 
-Initial State: A Lake network of \textit{TEST\_NODES} nodes on one machine running
+Initial State: A Lake network of \textit{MIN\_NODES} nodes on one machine running
 \textit{SMALL\_MODEL}.
 
 Input/Condition: During a request, the follower process is paused. In one run
@@ -1152,7 +1101,7 @@ signals and records the time of each retry from the Coordinator's log.
 
 Type: Dynamic, automated
 
-Initial State: A Lake network of \textit{TEST\_NODES} nodes on one machine running
+Initial State: A Lake network of \textit{MIN\_NODES} nodes on one machine running
 \textit{SMALL\_MODEL}.
 
 Input/Condition: The fault-injection option changes bytes in one tensor
@@ -1174,7 +1123,7 @@ before \progname{} reads them.
 
 Type: Dynamic, automated
 
-Initial State: A Lake network of \textit{TEST\_NODES} nodes on one Linux machine running
+Initial State: A Lake network of \textit{MIN\_NODES} nodes on one Linux machine running
 \textit{SMALL\_MODEL}, with the nodes connected through the loopback interface
 and a baseline latency recorded for the connection.
 
@@ -1193,6 +1142,41 @@ notice.
 \endgroup
 
 \subsection{Traceability Between Test Cases and Requirements}
+
+Table~\ref{tab:trace-fr} lists the functional requirements that each system test in
+Section~\ref{sec:fr-tests} verifies. Every functional requirement is supported by at least one
+system test, with the exceptions listed at the start of Section~\ref{sec:fr-tests}.
+
+\begin{table}[htbp]
+\centering
+\caption{Traceability of system tests to functional requirements}
+\label{tab:trace-fr}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Test Case ID} & \textbf{Requirements Verified} \\
+\midrule
+\hyperref[T.FR.CRD.1]{T.FR.CRD.1} & \textit{FR.S.1.4}, \textit{FR.S.1.5}, \textit{FR.S.1.15},
+		\textit{FR.S.1.17}, \textit{FR.S.1.18}, \textit{FR.S.1.20}, \textit{FR.S.1.21},
+		\textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.7}, \textit{FR.S.1.16}, \textit{FR.S.4.1} \\
+\hyperref[T.FR.CRD.2]{T.FR.CRD.2} & \textit{FR.S.1.1}, \textit{FR.S.1.6}, \textit{FR.S.1.8},
+		\textit{FR.S.1.19}, \textit{FR.S.3.1} \\
+\hyperref[T.FR.CRD.3]{T.FR.CRD.3} & \textit{FR.S.1.7}, \textit{FR.S.1.10}, \textit{FR.S.1.11},
+		\textit{FR.S.1.13}, \textit{FR.S.1.22}, \textit{FR.S.1.23}, \textit{FR.S.1.2},
+		\textit{FR.S.1.3}, \textit{FR.S.3.4}, \textit{FR.S.4.5} \\
+\hyperref[T.FR.CRD.4]{T.FR.CRD.4} & \textit{FR.S.1.12}, \textit{FR.S.1.13} \\
+\hyperref[T.FR.CRD.5]{T.FR.CRD.5} & \textit{FR.S.1.24}, \textit{FR.S.1.25}, \textit{SR4-2} \\
+\hyperref[T.FR.MP.1]{T.FR.MP.1} & \textit{FR.S.2.1}, \textit{FR.S.2.4}, \textit{FR.S.1.8} \\
+\hyperref[T.FR.MP.2]{T.FR.MP.2} & \textit{FR.S.2.2} \\
+\hyperref[T.FR.IE.1]{T.FR.IE.1} & \textit{FR.S.3.2}, \textit{FR.S.3.3}, \textit{FR.S.4.3}, \textit{FR.S.4.4},
+		\textit{FR.S.1.9} \\
+\hyperref[T.FR.IE.2]{T.FR.IE.2} & \textit{FR.S.3.5}, \textit{FR.S.4.6}, \textit{FR.S.1.14} \\
+\hyperref[T.FR.TIO.1]{T.FR.TIO.1} & \textit{FR.S.4.2} \\
+\hyperref[T.FR.LCLI.1]{T.FR.LCLI.1} & \textit{FR.S.5.1}, \textit{FR.S.5.2}, \textit{FR.S.5.3}, \textit{FR.S.5.7} \\
+\hyperref[T.FR.LCLI.2]{T.FR.LCLI.2} & \textit{FR.S.5.5}, \textit{FR.S.5.6} \\
+\hyperref[T.FR.LCLI.3]{T.FR.LCLI.3} & \textit{FR.S.5.4} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 Table~\ref{tab:trace-nfr} lists the nonfunctional and safety requirements
 that each system test in Sections~\ref{sec:nfr-tests} and~\ref{sec:sr-tests}
@@ -1252,7 +1236,8 @@ areas we already plan to unit test are listed in Section~\ref{sec:ImpVer}.
 
 \section{Appendix}
 
-This is where you can place additional information.
+This appendix gives the symbolic parameters used by the system tests and the
+questions for the usability session.
 
 \subsection{Symbolic Parameters}
 \label{sec:symbolic-parameters}
@@ -1260,17 +1245,37 @@ This is where you can place additional information.
 The definition of the test cases will call for SYMBOLIC\_CONSTANTS.
 Their values are defined in this section for easy maintenance.
 
-Values taken from the SRS Symbolic Constants appendix keep the value given
-there and are listed in Table~\ref{tab:vnv-constants}. Values only used in
-testing are listed in Table~\ref{tab:vnv-test-constants}. The test models (\textit{SMALL\_MODEL}, \textit{DEMO\_MODEL}
-and \textit{CAPACITY\_MODEL}) are defined in Table~\ref{tab:test-models}.
+The test models are listed in Table~\ref{tab:test-models}. All three use the
+Llama architecture, so the same code path is tested from the smallest model to
+the largest, and all three are released under the Apache 2.0 licence. Values
+taken from the SRS Symbolic Constants appendix keep the value given there and
+are listed in Table~\ref{tab:vnv-constants}. Values only used in testing are
+listed in Table~\ref{tab:vnv-test-constants}.
+
+\begin{table}[h]
+\centering
+\caption{Test models}
+\label{tab:test-models}
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Name} & \textbf{Model and use} & \textbf{Size} \\
+\midrule
+\textit{SMALL\_MODEL} & SmolLM2-135M-Instruct, Q8\_0. Continuous integration
+  and tests where answer quality does not matter. & about 150 MB \\
+\textit{DEMO\_MODEL} & SmolLM2-1.7B-Instruct, Q8\_0. Quality comparisons,
+  compatibility runs and the usability session. & about 1.8 GB \\
+\textit{CAPACITY\_MODEL} & Mistral-7B-Instruct-v0.3, at the precision chosen
+  in test \hyperref[T.NFR.PERF.1]{T.NFR.PERF.1}. & 7.7 to 14.5 GB \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \begin{table}[h]
 \centering
 \small
 \caption{Symbolic parameters from the SRS}
 \label{tab:vnv-constants}
-\begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}X}
+\begin{tabularx}{\textwidth}{ll>{\raggedright\arraybackslash}X}
 \toprule
 \textbf{Name} & \textbf{Value} & \textbf{Description} \\
 \midrule
@@ -1289,14 +1294,13 @@ and \textit{CAPACITY\_MODEL}) are defined in Table~\ref{tab:test-models}.
   for. \\
 \textit{MEMORY\_MARGIN} & 10\% & Share of each node's memory left free for
   runtime overhead. \\
-\textit{MIN\_NODES} & 2 & Minimum number of nodes a model is partitioned
-  across. \\
+\textit{MIN\_NODES} & 2 & Minimum nodes a model is partitioned across; also the
+  default size of a test Lake network. \\
+\textit{FAIL\_THRESHOLD} & 50\% & Share of usual throughput below which a node is failing. \\
 \textit{HEALTH\_TTL} & 15 s & Age after which health data is stale. \\
-\textit{NODE\_TIMEOUT} & 10 s & Time without a response after which a
-  connection is treated as failed. \\
+\textit{NODE\_TIMEOUT} & 10 s & Time without a response before a connection is failed. \\
 \textit{RECOVERY\_LIMIT} & 3 & Maximum recovery attempts for one request. \\
-\textit{LEADER\_TIMEOUT} & 30 s & Time without a health query after which a
-  follower assumes the leader has failed. \\
+\textit{LEADER\_TIMEOUT} & 30 s & Time without a health query before followers assume the leader failed. \\
 \textit{LATENCY\_TOL} & 50\% & Increase over baseline latency that is reported
   to the Coordinator. \\
 \bottomrule
@@ -1314,8 +1318,6 @@ and \textit{CAPACITY\_MODEL}) are defined in Table~\ref{tab:test-models}.
 \midrule
 \textit{TEST\_PROMPTS} & 20 & Number of fixed prompts used by default. \\
 \textit{GEN\_TOKENS} & 128 & Tokens generated per prompt. \\
-\textit{TEST\_NODES} & 2 & Number of nodes in the default test Lake network.
-  Tests that need a specific number of nodes give it themselves. \\
 \textit{BENCH\_QUESTIONS} & 500 & MMLU questions in \hyperref[T.NFR.PERF.3]{T.NFR.PERF.3}. \\
 \textit{LOSS\_LEVELS} & 1\%, 5\%, \textit{MAX\_LOSS} & Packet loss and
   corruption rates in \hyperref[T.NFR.FT.2]{T.NFR.FT.2}. \\
