@@ -36,38 +36,19 @@
 
 \section*{Revision History}
 
-\begin{tabularx}{\textwidth}{p{3cm}p{2cm}X}
-\toprule {\bf Date} & {\bf Version} & {\bf Notes}\\
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Date} & \textbf{Developer(s)} & \textbf{Change}\\
 \midrule
-Date 1 & 1.0 & Notes\\
-Date 2 & 1.1 & Notes\\
+November 2, 2026 & All team members & Initial revision\\
 \bottomrule
 \end{tabularx}
-
-~\\
-\wss{The intention of the VnV plan is to increase confidence in the software.
-However, this does not mean listing every verification and validation technique
-that has ever been devised.  The VnV plan should also be a \textbf{feasible}
-plan. Execution of the plan should be possible with the time and team available.
-If the full plan cannot be completed during the time available, it can either be
-modified to ``fake it'', or a better solution is to add a section describing
-what work has been completed and what work is still planned for the future.}
-
-\wss{The VnV plan is typically started after the requirements stage, but before
-the design stage.  This means that the sections related to unit testing cannot
-initially be completed.  The sections will be filled in after the design stage
-is complete.  the final version of the VnV plan should have all sections filled
-in.}
 
 \newpage
 
 \tableofcontents
 
 \listoftables
-\wss{Remove this section if it isn't needed}
-
-\listoffigures
-\wss{Remove this section if it isn't needed}
 
 \newpage
 
@@ -165,8 +146,14 @@ in.}
 
 \pagenumbering{arabic}
 
-This document ... \wss{provide an introductory blurb and roadmap of the
-  Verification and Validation plan}
+This document is the Verification and Validation (V\&V) Plan for \progname{}.
+The General Information section describes what is being tested and why. The
+Plan section covers how we verify the SRS, the design, this plan, and the
+implementation, and how we validate the system with users. The System Tests
+section lists the tests for the functional, nonfunctional, and safety
+requirements and traces each test to a requirement. The Unit Test Description
+will be completed after the design documents. The appendix holds the symbolic
+parameters and the usability survey.
 
 \section{General Information}
 
@@ -208,8 +195,8 @@ speed is measured but has no pass threshold, since a split model is not
 expected to beat one device on a model that already fits. Related to NFR.S.4
 and NFR.S.5.
 
-Usability is checked with the survey in the appendix rather than a formal
-study. For platforms, we test the operating system, CPU, and GPU combinations
+Usability is checked with a session with new users and the survey in the
+appendix. For platforms, we test the operating system, CPU, and GPU combinations
 the team owns and report the rest as untested in the V\&V Report.
 
 We test how \progname{} uses ggml and llama.cpp, not the libraries
@@ -248,7 +235,7 @@ requirements, design, implementation, and testing are each verified throughout t
 
 \hyperref[sec:VnVTeam]{3.1} begins by establishing team roles specifically for project verification. Following this,
 \hyperref[sec:SRSVer]{3.2}, \hyperref[sec:DesignVer]{3.3}, and \hyperref[sec:VnVVer]{3.4} specify how the team will verify
-various non-code artifacts - the \citet{SRS}, design, and the verification and validation plan (this document).
+various non-code artifacts - the SRS \citep{SRS}, design, and the verification and validation plan (this document).
 
 Finally, \hyperref[sec:ImpVer]{3.5} - Implementation Verification, \hyperref[sec:AutoTestVer]{3.6} - Automated Testing and
 Verification Tools, and \hyperref[sec:SoftVal]{3.7} - Software Validation provide further specification on how code artifacts
@@ -1132,128 +1119,9 @@ these tests also check a functional requirement, such as FR.S.5.6 in
 
 \section{Unit Test Description}
 
-\wss{This section should not be filled in until after the MIS (detailed design
-  document) has been completed.}
-
-\wss{Reference your MIS (detailed design document) and explain your overall
-philosophy for test case selection.}  
-
-\wss{To save space and time, it may be an option to provide less detail in this section.  
-For the unit tests you can potentially layout your testing strategy here.  That is, you 
-can explain how tests will be selected for each module.  For instance, your test building 
-approach could be test cases for each access program, including one test for normal behaviour 
-and as many tests as needed for edge cases.  Rather than create the details of the input 
-and output here, you could point to the unit testing code.  For this to work, you code 
-needs to be well-documented, with meaningful names for all of the tests.}
-
-\subsection{Unit Testing Scope}
-
-\wss{What modules are outside of the scope.  If there are modules that are
-  developed by someone else, then you would say here if you aren't planning on
-  verifying them.  There may also be modules that are part of your software, but
-  have a lower priority for verification than others.  If this is the case,
-  explain your rationale for the ranking of module importance.}
-
-\subsection{Tests for Functional Requirements}
-
-\wss{Most of the verification will be through automated unit testing.  If
-  appropriate specific modules can be verified by a non-testing based
-  technique.  That can also be documented in this section.}
-
-\subsubsection{Module 1}
-
-\wss{Include a blurb here to explain why the subsections below cover the module.
-  References to the MIS would be good.  You will want tests from a black box
-  perspective and from a white box perspective.  Explain to the reader how the
-  tests were selected.}
-
-\begin{enumerate}
-
-\item{test-id1\\}
-
-Type: \wss{Functional, Dynamic, Manual, Automatic, Static etc. Most will
-  be automatic}
-					
-Initial State: 
-					
-Input: 
-					
-Output: \wss{The expected result for the given inputs}
-
-Test Case Derivation: \wss{Justify the expected value given in the Output field}
-
-How test will be performed: 
-					
-\item{test-id2\\}
-
-Type: \wss{Functional, Dynamic, Manual, Automatic, Static etc. Most will
-  be automatic}
-					
-Initial State: 
-					
-Input: 
-					
-Output: \wss{The expected result for the given inputs}
-
-Test Case Derivation: \wss{Justify the expected value given in the Output field}
-
-How test will be performed: 
-
-\item{...\\}
-    
-\end{enumerate}
-
-\subsubsection{Module 2}
-
-...
-
-\subsection{Tests for Nonfunctional Requirements}
-
-\wss{If there is a module that needs to be independently assessed for
-  performance, those test cases can go here.  In some projects, planning for
-  nonfunctional tests of units will not be that relevant.}
-
-\wss{These tests may involve collecting performance data from previously
-  mentioned functional tests.}
-
-\subsubsection{Module ?}
-		
-\begin{enumerate}
-
-\item{test-id1\\}
-
-Type: \wss{Functional, Dynamic, Manual, Automatic, Static etc. Most will
-  be automatic}
-					
-Initial State: 
-					
-Input/Condition: 
-					
-Output/Result: 
-					
-How test will be performed: 
-					
-\item{test-id2\\}
-
-Type: Functional, Dynamic, Manual, Static etc.
-					
-Initial State: 
-					
-Input: 
-					
-Output: 
-					
-How test will be performed: 
-
-\end{enumerate}
-
-\subsubsection{Module ?}
-
-...
-
-\subsection{Traceability Between Test Cases and Modules}
-
-\wss{Provide evidence that all modules have been considered.}
+This section will be completed after the Module Interface Specification
+\citep{MIS}, since unit tests are written against each module's interface. The
+areas we already plan to unit test are listed in Section~\ref{sec:ImpVer}.
 				
 \bibliographystyle{plainnat}
 
@@ -1364,15 +1232,12 @@ and whether the task was completed, and gives no hints during the tasks.
 
 \section{Appendix --- Generative AI Use Disclosure}
 
-\wss{ChatGPT (version 5) was used to brainstorm ideas for the template for this disclose section.}
-
 \subsection{AI Tools Used}
 
 \begin{itemize}
     \item Anthropic Claude Opus 5.5, used through Claude Code.
+    \item OpenAI ChatGPT.
 \end{itemize}
-
-\wss{Give the name of the AI tool(s) used and the version.}
 
 \subsection{How and Where Used}
 
@@ -1383,21 +1248,16 @@ and whether the task was completed, and gives no hints during the tasks.
     chose. We reviewed and edited the draft. Claude also drafted the
     nonfunctional and safety rows of the traceability table in 4.4, the
     symbolic parameters tables in 6.1 and the usability survey in 6.2.
+    \item \textbf{2 General Information}: Claude drafted the section from the
+    SRS, Hazard Analysis and Problem Statement, along with the bibliography
+    entries for our documents. We reviewed and edited the draft. Claude also
+    drafted the introduction, the Unit Test Description note and the
+    revision history in a final pass.
+    \item \textbf{3.5 Implementation Verification to 3.7 Software
+    Validation}: ChatGPT was used to brainstorm and research ideas and tools
+    alongside course material. It was also used to add placeholder \LaTeX{}
+    code and for a final grammar check, in these sections and in the appendix.
 \end{itemize}
-
-\wss{Explain what the tool(s) were used for.  Examples include: brainstorming,
-explaining a technical concept, reviewing the document, generating or modifying
-text, generating or modifying diagrams, identifying errors or omissions or
-inconsistencies.}
-
-\wss{For each of the uses, identify which parts of the document were affected.}
-
-ChatGPT was used to brainstorm and research ideas and tools alongside course material for Section 3.5, 3.6, 3.7. It was also used for adding template/placeholder LaTeX code as well as a final grammar check.
-
-ChatGPT was also used for the appendix for template/placeholder LaTeX code and a final grammar check.
-
-\wss{You do not need to report every interaction, but you should disclose the 
-uses that materially contributed to your work}
 
 \subsection{Verification of AI-Generated Content}
 
@@ -1405,16 +1265,8 @@ Every requirement ID and symbolic constant in the drafted sections was checked
 against the SRS, and every requirement in 4.2 was checked to have a test in the
 traceability table.
 
-\wss{\begin{itemize}
-    \item Describe how the team checked AI-generated or AI-assisted material
-    before including it in the document.
-    \item In particular, verify factual claims, technical assertions,
-    requirements, calculations, references, and other information for which an
-    AI system may produce incorrect or fabricated results.
-    \item \textbf{The team is responsible for the accuracy, completeness,
-consistency, and appropriateness of the submitted document, regardless of
-whether material was generated by a human or an AI system.}
-\end{itemize}}
+The requirement IDs, failure mode counts and document references in Section 2
+were also checked against the SRS and Hazard Analysis.
 
 \newpage{}
 
