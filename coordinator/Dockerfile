@@ -11,7 +11,7 @@
 # `if` guard keeps the image building while coordinator/pyproject.toml is
 # still an empty placeholder.
 
-FROM python:3.13-slim
+FROM python:3.15-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
@@ -32,19 +32,11 @@ WORKDIR /app
 # Manifest first: uv only re-resolves dependencies when pyproject.toml changes.
 COPY pyproject.toml .
 
-# uv sync resolves [project.dependencies] into /venv (no local venv or pip
-# chore anywhere). Guarded while the manifest is an empty placeholder.
-RUN if [ -s pyproject.toml ]; then \
-        uv sync ; \
-    else \
-        echo "TODO: coordinator/pyproject.toml is empty — dependency layer skipped" ; \
-    fi
+# uv sync resolves [project.dependencies] into /venv
+RUN ls && uv sync
 
 # Sources layer. In dev compose the same tree is bind-mounted at /app, so
 # host-side Python edits are live inside uv run without a rebuild.
 COPY . .
 
-# TODO: once the coordinator exists, uv run resolves the entrypoint from
-# /venv's environment — likely:
-#   CMD ["uv", "run", "uvicorn", "coordinator.main:app", "--host", "0.0.0.0", "--port", "8000"]
-CMD ["sh", "-c", "echo 'Lake coordinator placeholder: set the real CMD in coordinator/Dockerfile (uv run <entrypoint> once sources exist)'"]
+CMD ["uv", "run", "lake"]
