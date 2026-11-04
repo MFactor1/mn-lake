@@ -3,7 +3,9 @@ name = "coordinator"
 version = "0.0.0"
 requires-python = ">=3.15"
 license = "GPL-3.0-or-later"
-license-files = ["../LICENSE"]
+# license-files omitted: wheel metadata can only carry files inside the
+# coordinator/ package root, and the repo-root LICENSE lives outside the
+# ./coordinator build context. The license name field carries the legal info.
 authors = [
 	{ name = "Colin Chambachan", email = "<chambacc@mcmaster.ca>" },
 	{ name = "Jinwoo Hong", email = "<hongj54@mcmaster.ca>" },
@@ -17,4 +19,7 @@ requires = ["uv_build >= 0.13, < 0.14"]
 build-backend = "uv_build"
 
 [project.scripts]
-lake = "coordinator:main"
+lake = "coordinator.main:main"
+
+[dependency-groups]
+dev = ["pytest", "ruff"]

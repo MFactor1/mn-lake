@@ -1,8 +1,0 @@
-# Keep the build context small and reproducible.
-__pycache__
-**/__pycache__
-*.pyc
-*.pyo
-.venv
-**/.venv
-.pytest_cache

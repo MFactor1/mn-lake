@@ -286,3 +286,9 @@ __pycache__/
 
 # Rust build dir
 runtime/**/target
+
+# Lake pytest cache (container-side; harmless to keep host-side too)
+.pytest_cache/
+
+# Host-side copy of the built dependency venv (materialized by `just extract-venv`)
+coordinator/.venv/

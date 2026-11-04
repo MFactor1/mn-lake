@@ -1,15 +1,19 @@
 # Lake — one justfile for all devs (Linux, macOS, Windows).
 #
-# just is a single self-contained binary; install it once per machine:
-#   Linux: dnf/apt install just   macOS: brew install just
-#   Windows: winget install --id Casey.Just --exact  (or choco)
+# Two self-contained binaries are installed once per machine:
+#   just:  Linux dnf/apt install just | macOS brew install just
+#          Windows winget install --id Casey.Just --exact (or choco)
+#   uv:    Linux/macOS curl -LsSf https://astral.sh/uv/install.sh | sh
+#          Windows powershell irm https://astral.sh/uv/install.ps1 | iex
+#          (brew install uv / apt PPA also work)
 #
 # Run from the repo root:
 #   just                 # build both Lake processes natively
 #   just test            # build, then cargo test + pytest
 #   just build-runtime   # rebuild only the Rust side (incremental)
-#   just build-coordinator # uv sync deps in the coordinator container
-#   just up / just down  # docker dev loop for both processes
+#   just build-coordinator # uv sync: wheels + CPython into coordinator/.venv
+#   just run-local       # run the coordinator natively (uv run lake)
+#   just up / just down  # docker dev harness for the RUNTIME engine only
 #
 # OS-neutral design rules this file follows:
 # - On Windows recipes run in PowerShell ([windows] shell below); elsewhere
@@ -17,61 +21,62 @@
 # - Each recipe LINE runs in its own shell invocation, so recipes never use
 #   cd or &&; they use [working-directory] attributes instead, which work
 #   in sh and in PowerShell equally.
-# - uv/venv/python management stays ENTIRELY inside the coordinator
-#   container (see coordinator/Dockerfile): the host only needs just,
-#   the Rust toolchain (for the native runtime), and docker.
+# - The coordinator has NO docker layer at all: uv on the host manages the
+#   wheels (from the committed uv.lock — the same drift guard as committed
+#   Cargo.lock) AND the CPython interpreter itself (requires-python drives
+#   an auto-download when a dev has no Python). `uv run` behaves identically
+#   under sh and PowerShell, so no per-platform recipe variants are needed.
+#   The host needs: just, uv, the Rust toolchain, and docker only for the
+#   optional runtime compose harness.
 #
-# WIP status: coordinator/pyproject.toml is still an empty placeholder (uv
-# sync is skipped there with a TODO), and the Rust crates are stubs — cargo
-# fails where the stubs don't compile yet (engine/src/main.rs is empty).
-# These recipes need no structural changes as real code lands.
+# WIP status: coordinator deps are minimal (uv resolves them fine) and the
+# Rust crates are stubs; recipes need no structural changes as real code
+# lands. First uv sync needs network (wheel/interpreter download); after
+# that everything is local and cached.
 
 # Build both Lake processes natively for this machine (the default recipe).
+[parallel]
 build: build-runtime build-coordinator
 
-# Build the Rust runtime (binaries land in runtime/target/release/).
+[parallel]
+run: run-runtime run-coordinator
+
 [working-directory: 'runtime']
 build-runtime:
     cargo build --workspace --release
 
-# Resolve/install Python deps with uv inside the coordinator image
-# (uv sync layer runs at build time; devs never install uv or Python).
+[working-directory: 'coordinator']
 build-coordinator:
-    docker compose build coordinator
+    uv sync
 
-# Run both test suites (cargo test + pytest, per the VnV plan).
+[working-directory: 'coordinator']
+run-coordinator:
+    uv run lake
+
+[working-directory: 'runtime']
+run-runtime:
+	cargo run --workspace --release
+
+[parallel]
 test: test-runtime test-coordinator
 
-# cargo test for the Rust side.
 [working-directory: 'runtime']
 test-runtime:
     cargo test --workspace
 
-# pytest for the Python side, resolved through the container's uv env.
-# Args after the service name override the image CMD.
-test-coordinator: build-coordinator
-    docker compose run coordinator uv run pytest -q .
+[working-directory: 'coordinator']
+test-coordinator:
+    uv run pytest -q .
 
-# Remove local build artifacts (the Python side lives in the container
-# image; rebuilding cleans it — there is nothing host-side to delete).
-clean: clean-runtime
+clean: clean-runtime clean-coordinator
 
-# cargo clean.
 [working-directory: 'runtime']
 clean-runtime:
     cargo clean
 
-# Bring both Lake processes up together (needs docker installed).
-up:
-    docker compose up
-
-# Take both Lake processes down.
-down:
-    docker compose down
-
-# Rebuild both docker images after source changes.
-rebuild:
-    docker compose build
+[working-directory: 'coordinator']
+clean-coordinator:
+    uv venv --clear .venv
 
 # ---------------------------------------------------------------------------
 # Settings
