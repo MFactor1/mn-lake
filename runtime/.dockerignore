@@ -1,0 +1,7 @@
+# Keep local build artifacts and IDE noise out of the build context.
+target
+**/target
+Cargo.lock.bak
+*.swp
+.idea
+.vscode
