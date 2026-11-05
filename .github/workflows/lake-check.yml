@@ -1,0 +1,23 @@
+name: Lake Check
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+# github.workflow keeps the three workflows from cancelling one another.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Install the Lake toolchains
+        uses: $/.github/actions/lake-tools
+      - name: just check
+        run: just check
