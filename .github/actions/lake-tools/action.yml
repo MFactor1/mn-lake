@@ -1,0 +1,77 @@
+# Shared setup for every Lake job: installs the three toolchains the justfile
+# drives, then each caller just runs a recipe. Lives in one place so the pinned
+# versions and the reasons for pinning them cannot drift between the workflows
+# that report on Lake.
+#
+# Run this after actions/checkout: the Rust step works against runtime/, and the
+# uv step reads coordinator/pyproject.toml + coordinator/uv.toml + coordinator/uv.lock,
+# which only exist once the repo is checked out.
+#
+# Callers reference this with uses: $/.github/actions/lake-tools, the self-repo
+# reference: it resolves against this repository at the running commit instead of
+# whatever is checked out on the runner, so the three workflows cannot drift away
+# from this file. GitHub wants the action as a directory holding action.yml, not a
+# bare .yml file, which is why this sits at .github/actions/lake-tools/.
+#
+# The Lake workflows also share two choices that live in their own files because
+# actions cannot supply them:
+# - runs-on: ubuntu-26.04, pinned rather than ubuntu-latest. That label is mid-
+#   migration to 26.04 (rollout Oct 19 -> Nov 19 2026), so an unpinned run's
+#   tools and library versions change under it, and GitHub warns that image swaps
+#   break workflows relying on preinstalled versions. The version notes below are
+#   stated against that image.
+# - triggers: push to main plus every pull_request, which mirrors the repo's
+#   PR-only main: a pull request is judged as proposed, and the push that lands
+#   the merge judges the tree now on main.
+
+name: Lake toolchains
+description: Install just, the Rust toolchain and uv for Lake's justfile.
+
+runs:
+  using: composite
+  steps:
+    # just is not preinstalled on the runner images, and Ubuntu's own copy ages
+    # down the LTS line (24.04: 1.21.0, 26.04: 1.45.0), while this justfile needs
+    # >= 1.42.0 for [parallel] and >= 1.38.0 for [working-directory]; the
+    # [unix]/[windows] pair that clean-coordinator uses has been around since 1.8.0.
+    # Fetch from casey/just releases, and state the floor rather than a version so
+    # CI tracks whatever release a dev's package manager gives them (host right
+    # now: 1.59.0, which is what this range selects too). The value is handed to
+    # npm semver, which reads >=1.42.0 as a comparator range.
+    - name: Install just
+      uses: extractions/setup-just@v4
+      with:
+        just-version: ">=1.42.0"
+
+    # The image already carries rustup's stable (Cargo/Rust 1.99.1 and rustfmt
+    # 1.10.0 on the Nov 2026 image, above this workspace's rust-version = 1.90
+    # floor) but no clippy, so the real job here is pinning the toolchain instead
+    # of inheriting the image's, and installing the two components the justfile
+    # drives. Pinning guards CI's compiler against image updates the same way the
+    # committed Cargo.lock guards dependencies. rust-src-dir points at runtime/
+    # and lets the bundled rust cache persist runtime/target between runs.
+    - name: Install the Rust toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v2
+      with:
+        toolchain: stable
+        components: clippy,rustfmt
+        rust-src-dir: runtime
+        # The action's default deny would fail on warnings here while a dev's
+        # plain cargo build shrugs at them; keep the verdicts identical and let
+        # clippy stay the linting gate.
+        build-warnings: ""
+
+    # uv drives the coordinator side (uv.lock is committed, uv_build builds the
+    # project), so CI installs it rather than borrowing the image's Python:
+    # pinned to the 0.13.x range to match coordinator/pyproject.toml's
+    # uv_build >= 0.13, < 0.14, since uv_build ships inside uv itself and a
+    # newer uv refuses to build the project. coordinator/uv.toml's python-downloads
+    # = automatic then has uv fetch the CPython satisfying requires-python >=3.15
+    # (uv prefers its own managed interpreter, so the image's Python is not a
+    # factor), and uv sync installs every declared package: no wheels or
+    # interpreters get installed by hand.
+    - name: Install uv
+      uses: astral-sh/setup-uv@v10
+      with:
+        version: "0.13.x"
+        enable-cache: true

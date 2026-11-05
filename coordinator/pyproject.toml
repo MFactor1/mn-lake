@@ -23,7 +23,3 @@ lake = "coordinator.main:main"
 
 [dependency-groups]
 dev = ["pytest", "ruff"]
-
-[pytest]
-addopts = ["--import-mode=importlib"]
-pythonpath = ["src"]

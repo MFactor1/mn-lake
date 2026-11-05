@@ -1,0 +1,29 @@
+name: Lake Test
+
+# See lake-build.yml for why each recipe is its own workflow, and
+# .github/actions/lake-tools/action.yml for the pinned image and shared triggers.
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+# github.workflow keeps the three workflows from cancelling one another.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Install the Lake toolchains
+        uses: $/.github/actions/lake-tools
+      # cargo test --workspace plus uv-run pytest. Expect the "0 tests" lines for
+      # binary targets (main.rs carries no #[test]) and for doc-tests while the
+      # crates are stubs; both become load-bearing as real code lands.
+      - name: just test
+        run: just test

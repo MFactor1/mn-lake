@@ -1,0 +1,34 @@
+name: Lake Build
+
+# One workflow per justfile recipe so the PR checks list gets three separate
+# rows (Lake Build / Lake Check / Lake Test); folding them into jobs of one
+# workflow would show a single row with the other two in its details.
+# They run independently: GitHub's `needs` cannot order jobs across files, so
+# these are three standalone verdicts, not a build -> check -> test chain.
+#
+# See .github/actions/lake-tools/action.yml for the pinned image and the shared
+# triggers/rationale.
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+# github.workflow keeps the three workflows from cancelling one another.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Install the Lake toolchains
+        uses: $/.github/actions/lake-tools
+      # cargo build --workspace --release plus uv sync: Rust binaries in
+      # runtime/target/release/, the coordinator environment in coordinator/.venv.
+      - name: just build
+        run: just build
