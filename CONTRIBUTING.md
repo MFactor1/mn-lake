@@ -10,7 +10,7 @@ Management sections). By contributing, you agree to follow the
 | Tool | Instructions |
 | --- | --- |
 | just (build runner) | https://just.systems/man/en/packages.html |
-| uv (Python toolchain) | https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_1 |
+| uv (Python toolchain) | https://docs.astral.sh/uv/getting-started/installation/ |
 | Rustup (Rust toolchain) | https://rustup.rs |
 
 Lake requires Python >= 1.15, and rustc >= 1.90, but uv and Rustup should handle this for you.
