@@ -34,22 +34,16 @@ test-runtime:
 test-coordinator:
 	uv run pytest .
 
-lint: fmt-runtime fmt-coordinator lint-runtime lint-coordinator
-
-[working-directory: 'runtime']
-fmt-runtime:
-	cargo fmt --all
-
-[working-directory: 'coordinator']
-fmt-coordinator:
-	uv run ruff format .
+lint: lint-runtime lint-coordinator
 
 [working-directory: 'runtime']
 lint-runtime:
+	cargo fmt --all
 	cargo clippy --workspace --all-targets --fix --allow-dirty
 
 [working-directory: 'coordinator']
 lint-coordinator:
+	uv run ruff format .
 	uv run ruff check --fix
 
 check: check-runtime check-coordinator
