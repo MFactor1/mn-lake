@@ -8,7 +8,7 @@ Management sections). By contributing, you agree to follow the
 ## Prerequisites
 
 | Tool | Instructions |
-| --- |
+| --- | --- |
 | just (build runner) | https://just.systems/man/en/packages.html |
 | uv (Python toolchain) | https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_1 |
 | Rustup (Rust toolchain) | https://rustup.rs |

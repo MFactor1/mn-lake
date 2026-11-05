@@ -28,7 +28,7 @@ If you're a developer, see CONTRIBUTING.md instead for developer install instruc
 ## From Source
 ### Prerequisites
 | Tool | Instructions |
-| --- |
+| --- | --- |
 | just (build runner) | https://just.systems/man/en/packages.html |
 | uv (Python toolchain) | https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_1 |
 | Rustup (Rust toolchain) | https://rustup.rs |
