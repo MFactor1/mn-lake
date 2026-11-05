@@ -5,6 +5,67 @@ This guide summarizes how the team works in this repository. The full rationale 
 Management sections). By contributing, you agree to follow the
 [Code of Conduct](CodeOfConduct.md).
 
+## Prerequisites
+
+| Tool | Instructions |
+| --- | --- |
+| just (build runner) | https://github.com/casey/just/blob/master/README.md#installation |
+| uv (Python toolchain) | https://docs.astral.sh/uv/getting-started/installation/ |
+| Rustup (Rust toolchain) | https://rustup.rs |
+
+Lake requires Python >= 3.15, and rustc >= 1.90, but uv and Rustup should handle this for you.
+
+After installing all three:
+```sh
+rustup update
+rustup component add clippy
+rustup component add rustfmt
+```
+
+## Building, Running, Testing, Linting, and Formatting
+The `just` command makes building, testing, linting, and formatting very simple.
+
+### Building
+```sh
+just build              # builds all
+just build-runtime      # builds runtime/engine only
+just build-coordinator  # builds coordinator only
+```
+Output artifacts are:
+- Coordinator: `coordinator/.venv`. `.venv` is a Python virtual environment containing the
+  coordinator and all its dependencies. You can run it by calling the entrypoint at `.venv/bin/lake`.
+- Engine/runtime: `runtime/target/release/lake_engine`. This is a binary you can execute directly.
+
+### Running
+There is also support for building & immediately running Lake on your development system in one
+command:
+```sh
+just run              # builds & runs all
+just run-runtime      # builds & runs runtime/engine only
+just run-coordinator  # builds & runs coordinator only
+```
+This is equivalent to calling `just build`, then calling the coordinator entrypoint and the runtime
+binary.
+
+### Testing
+```sh
+just test              # tests all
+just test-runtime      # tests runtime/engine only
+just test-coordinator  # tests coordinator only
+```
+
+### Linting & Formatting
+```sh
+just lint              # formats & lints all
+just lint-runtime      # formats & lints runtime/engine only
+just lint-coordinator  # formats & lints coordinator only
+```
+
+### Other
+```sh
+just clean  # Removes build files
+```
+
 ## Issues
 
 All formal action items are tracked as GitHub issues, and issues are how work is assigned.
