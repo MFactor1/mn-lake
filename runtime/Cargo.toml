@@ -22,3 +22,10 @@ authors = [
 # Internal
 ggml_rs = { path = "crates/ggml_rs" }
 tensor_io = { path = "crates/tensor_io" }
+
+[workspace.lints.clippy]
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "deny", priority = -1 }
+style = { level = "deny", priority = -1 }
+complexity = { level = "deny", priority = -1 }
+perf = { level = "deny", priority = -1 }

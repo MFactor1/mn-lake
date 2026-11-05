@@ -11,6 +11,9 @@ license = { workspace = true }
 ggml_rs = { workspace = true }
 tensor_io = { workspace = true }
 
+[lints]
+workspace = true
+
 [[bin]]
 name = "lake_engine"
 path = "src/main.rs"

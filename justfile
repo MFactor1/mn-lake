@@ -1,40 +1,7 @@
-# Lake — one justfile for all devs (Linux, macOS, Windows).
-#
-# Two self-contained binaries are installed once per machine:
-#   just:  Linux dnf/apt install just | macOS brew install just
-#          Windows winget install --id Casey.Just --exact (or choco)
-#   uv:    Linux/macOS curl -LsSf https://astral.sh/uv/install.sh | sh
-#          Windows powershell irm https://astral.sh/uv/install.ps1 | iex
-#          (brew install uv / apt PPA also work)
-#
-# Run from the repo root:
-#   just                 # build both Lake processes natively
-#   just test            # build, then cargo test + pytest
-#   just build-runtime   # rebuild only the Rust side (incremental)
-#   just build-coordinator # uv sync: wheels + CPython into coordinator/.venv
-#   just run-local       # run the coordinator natively (uv run lake)
-#   just up / just down  # docker dev harness for the RUNTIME engine only
-#
-# OS-neutral design rules this file follows:
-# - On Windows recipes run in PowerShell ([windows] shell below); elsewhere
-#   the default sh is used.
-# - Each recipe LINE runs in its own shell invocation, so recipes never use
-#   cd or &&; they use [working-directory] attributes instead, which work
-#   in sh and in PowerShell equally.
-# - The coordinator has NO docker layer at all: uv on the host manages the
-#   wheels (from the committed uv.lock — the same drift guard as committed
-#   Cargo.lock) AND the CPython interpreter itself (requires-python drives
-#   an auto-download when a dev has no Python). `uv run` behaves identically
-#   under sh and PowerShell, so no per-platform recipe variants are needed.
-#   The host needs: just, uv, the Rust toolchain, and docker only for the
-#   optional runtime compose harness.
-#
-# WIP status: coordinator deps are minimal (uv resolves them fine) and the
-# Rust crates are stubs; recipes need no structural changes as real code
-# lands. First uv sync needs network (wheel/interpreter download); after
-# that everything is local and cached.
+# ---------------------------------------------------------------------------
+# Targets
+# ---------------------------------------------------------------------------
 
-# Build both Lake processes natively for this machine (the default recipe).
 [parallel]
 build: build-runtime build-coordinator
 
@@ -43,40 +10,75 @@ run: run-runtime run-coordinator
 
 [working-directory: 'runtime']
 build-runtime:
-    cargo build --workspace --release
+	cargo build --workspace --release
 
 [working-directory: 'coordinator']
 build-coordinator:
-    uv sync
+	uv sync
 
 [working-directory: 'coordinator']
 run-coordinator:
-    uv run lake
+	uv run lake
 
 [working-directory: 'runtime']
 run-runtime:
-	cargo run --workspace --release
+	cargo run --release
 
-[parallel]
 test: test-runtime test-coordinator
 
 [working-directory: 'runtime']
 test-runtime:
-    cargo test --workspace
+	cargo test --workspace
 
 [working-directory: 'coordinator']
 test-coordinator:
-    uv run pytest -q .
+	uv run pytest .
+
+lint: fmt-runtime fmt-coordinator lint-runtime lint-coordinator
+
+[working-directory: 'runtime']
+fmt-runtime:
+	cargo fmt --all
+
+[working-directory: 'coordinator']
+fmt-coordinator:
+	uv run ruff format .
+
+[working-directory: 'runtime']
+lint-runtime:
+	cargo clippy --workspace --all-targets --fix --allow-dirty
+
+[working-directory: 'coordinator']
+lint-coordinator:
+	uv run ruff check --fix
+
+check: check-runtime check-coordinator
+
+[working-directory: 'runtime']
+check-runtime:
+	cargo fmt --all --check
+	cargo clippy --workspace --all-targets
+
+[working-directory: 'coordinator']
+check-coordinator:
+	uv run ruff format . --check
+	uv run ruff check
 
 clean: clean-runtime clean-coordinator
 
 [working-directory: 'runtime']
 clean-runtime:
-    cargo clean
+	cargo clean
 
+[unix]
 [working-directory: 'coordinator']
 clean-coordinator:
-    uv venv --clear .venv
+	rm -rf .venv
+
+[windows]
+[working-directory: 'coordinator']
+clean-coordinator:
+	Remove-Item -Recurse -Force .venv
 
 # ---------------------------------------------------------------------------
 # Settings
