@@ -23,6 +23,9 @@ authors = [
 ggml_rs = { path = "crates/ggml_rs" }
 tensor_io = { path = "crates/tensor_io" }
 
+[workspace.lints.rust]
+missing_docs = "deny"
+
 [workspace.lints.clippy]
 correctness = { level = "deny", priority = -1 }
 suspicious = { level = "deny", priority = -1 }
