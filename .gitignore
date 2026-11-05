@@ -283,3 +283,13 @@ TSWLatexianTemp*
 ## Python bytecode from the build scripts
 __pycache__/
 *.pyc
+
+# Rust build dir
+runtime/**/target
+
+# Lake pytest & ruff cache
+.pytest_cache/
+.ruff_cache/
+
+# Coordinator venv
+coordinator/.venv/

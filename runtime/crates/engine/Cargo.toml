@@ -1,0 +1,19 @@
+[package]
+name = "engine"
+version = "0.0.0"
+
+edition = { workspace = true }
+rust-version = { workspace = true }
+authors = { workspace = true }
+license = { workspace = true }
+
+[dependencies]
+ggml_rs = { workspace = true }
+tensor_io = { workspace = true }
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "lake_engine"
+path = "src/main.rs"

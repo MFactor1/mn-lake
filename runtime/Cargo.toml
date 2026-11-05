@@ -1,0 +1,34 @@
+[workspace]
+resolver = "2"
+members = [
+	"crates/engine",
+	"crates/ggml_rs",
+	"crates/tensor_io",
+]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.90"
+license = "GPL-3.0-or-later"
+authors = [
+	"Colin Chambachan <chambacc@mcmaster.ca>",
+	"Jinwoo Hong <hongj54@mcmaster.ca>",
+	"Matthew Nesbitt <nesbim2@mcmaster.ca>",
+	"Gary Qin <qinz51@mcmaster.ca>",
+	"Ethan Walsh <walse11@mcmaster.ca>",
+]
+
+[workspace.dependencies]
+# Internal
+ggml_rs = { path = "crates/ggml_rs" }
+tensor_io = { path = "crates/tensor_io" }
+
+[workspace.lints.rust]
+missing_docs = "deny"
+
+[workspace.lints.clippy]
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "deny", priority = -1 }
+style = { level = "deny", priority = -1 }
+complexity = { level = "deny", priority = -1 }
+perf = { level = "deny", priority = -1 }

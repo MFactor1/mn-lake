@@ -1,0 +1,48 @@
+[project]
+name = "coordinator"
+version = "0.0.0"
+requires-python = ">=3.15"
+license = "GPL-3.0-or-later"
+authors = [
+	{ name = "Colin Chambachan", email = "<chambacc@mcmaster.ca>" },
+	{ name = "Jinwoo Hong", email = "<hongj54@mcmaster.ca>" },
+	{ name = "Matthew Nesbitt", email = "<nesbim2@mcmaster.ca>" },
+	{ name = "Gary Qin", email = "<qinz51@mcmaster.ca>" },
+	{ name = "Ethan Walsh", email = "<walse11@mcmaster.ca>" },
+]
+
+[build-system]
+requires = ["uv_build >= 0.13, < 0.14"]
+build-backend = "uv_build"
+
+[project.scripts]
+lake = "coordinator.main:main"
+
+[dependency-groups]
+dev = ["pytest", "ruff"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py315"
+
+[tool.ruff.lint]
+extend-select = [
+	"D",
+	"FIX",
+	"FAST",
+]
+ignore = [
+	"D105",
+	"D107",
+	"D202",
+	"D203",
+	"D204",
+	"D205",
+	"D212",
+	"D4",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
