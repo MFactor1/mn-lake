@@ -14,12 +14,11 @@ Distributed artificial intelligence inference for local edge devices.
 
 The folders and files for this project are as follows:
 
-docs - Documentation for the project
-refs - Reference material used for the project, including papers
-coordinator - Python source code for the coordinator part of Lake
-runtime - Rust source code for the runtime/engine part of Lake
-test - End-to-End test cases. (Unit tests can be found with the source)
-etc.
+- docs: Documentation for the project
+- refs: Reference material used for the project, including papers
+- coordinator: Python source code for the coordinator part of Lake
+- runtime: Rust source code for the runtime/engine part of Lake
+- test: End-to-End test cases. (Unit tests can be found with the source)
 
 The documentation for this project is updated on the project's [GitHub page](https://capstonecegjm.github.io/Lake/).
 
