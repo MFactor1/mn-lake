@@ -44,7 +44,7 @@ just run              # builds & runs all
 just run-runtime      # builds & runs runtime/engine only
 just run-coordinator  # builds & runs coordinator only
 ```
-This is equivalent to calling `just build`, then calling the coordinator entrypoint, and the runtime
+This is equivalent to calling `just build`, then calling the coordinator entrypoint and the runtime
 binary.
 
 ### Testing
